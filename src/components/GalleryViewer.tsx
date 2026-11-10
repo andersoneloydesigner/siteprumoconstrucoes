@@ -6,6 +6,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { GALLERY } from "../constants";
+import { GalleryItem } from "../types";
 
 export default function GalleryViewer() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -13,6 +14,11 @@ export default function GalleryViewer() {
   const [gutterX, setGutterX] = useState(24);
   const [isPaused, setIsPaused] = useState(false);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollLeftRef = useRef(0);
+  const dragMovedRef = useRef(false);
 
   // Auto-calculated custom gutter to align first image with container margins
   useEffect(() => {
@@ -33,12 +39,44 @@ export default function GalleryViewer() {
     };
   }, []);
 
-  // Toggle pause when user clicks on an image
-  const handleImageClick = () => {
-    setIsPaused((prev) => !prev);
+  // Open Lightbox when user clicks on an image (only if not dragging)
+  const handleImageClick = (item: GalleryItem) => {
+    if (dragMovedRef.current) return;
+    setSelectedItem(item);
+    setIsPaused(true);
   };
 
-  // Continuous auto-scrolling that pauses on hover or after interaction
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    dragMovedRef.current = false;
+    dragStartXRef.current = e.pageX - scrollRef.current.offsetLeft;
+    dragStartScrollLeftRef.current = scrollRef.current.scrollLeft;
+    scrollRef.current.style.scrollBehavior = "auto";
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - dragStartXRef.current) * 1.25;
+    if (Math.abs(walk) > 5) {
+      dragMovedRef.current = true;
+    }
+    scrollRef.current.scrollLeft = dragStartScrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = (leaveContainer: boolean) => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
+    if (leaveContainer && !selectedItem) {
+      setIsPaused(false);
+    }
+  };
+
+  // Continuous auto-scrolling that pauses on hover, drag, lightbox, or after interaction
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -48,7 +86,7 @@ export default function GalleryViewer() {
     const speed = 35; // Pixels per second constant motion
 
     const animate = (time: number) => {
-      if (!isPaused && !isButtonClicked && container) {
+      if (!isPaused && !isButtonClicked && !isDragging && !selectedItem && container) {
         const delta = (time - lastTime) / 1000;
         lastTime = time;
 
@@ -73,7 +111,7 @@ export default function GalleryViewer() {
 
     animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPaused, isButtonClicked]);
+  }, [isPaused, isButtonClicked, isDragging, selectedItem]);
 
   const slide = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -116,7 +154,7 @@ export default function GalleryViewer() {
     <div
       className="relative w-full"
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseLeave={() => handleMouseUpOrLeave(true)}
     >
       {/* Left Overlay Navigation Button (Low Opacity, Arrow Icon Only) */}
       <button
@@ -138,36 +176,42 @@ export default function GalleryViewer() {
         <ArrowRight className="w-5 h-5" />
       </button>
 
-      {/* Scrollable Track - Full bleed container with padding-left/right dynamic offsets */}
+      {/* Scrollable Track - Full bleed container with padding-left/right dynamic offsets & drag support */}
       <div
         ref={scrollRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={() => handleMouseUpOrLeave(false)}
         style={{ paddingLeft: `${gutterX}px`, paddingRight: `${gutterX}px`, scrollBehavior: "auto" }}
-        className="flex gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2 select-none"
+        className={`flex gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2 select-none ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
       >
         {GALLERY.map((item, index) => (
           <div
             key={item.id || index}
-            onClick={handleImageClick}
-            title={isPaused ? "Clique para continuar o carrossel" : "Clique para pausar o carrossel"}
-            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 snap-start border border-sky-100 rounded-2xl bg-white p-3 transition-all duration-200 hover:border-[#0893E6] hover:shadow-md overflow-hidden group shadow-xs flex flex-col justify-between cursor-pointer"
+            onClick={() => handleImageClick(item)}
+            title="Arraste para o lado ou clique para ampliar"
+            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 border border-sky-100 rounded-2xl bg-white p-3 transition-all duration-200 hover:border-[#0893E6] hover:shadow-md overflow-hidden group shadow-xs flex flex-col justify-start text-left"
           >
             {/* Image Frame - Rectangular with Rounded Borders */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-sky-50">
+            <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-xl bg-sky-50">
               <img
                 src={item.url}
                 alt={item.alt || `Obra Prumo Construções ${index + 1}`}
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                draggable={false}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04] pointer-events-none select-none"
                 referrerPolicy="no-referrer"
               />
             </div>
 
-            {/* Caption Footer */}
-            <div className="pt-4 px-2 pb-2 bg-white space-y-1">
-              <div className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-bold">
+            {/* Caption Footer - Top-aligned right below image so all cards align */}
+            <div className="pt-4 px-2 pb-2 bg-white space-y-1.5 flex-1 flex flex-col justify-start text-left">
+              <div className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-bold truncate">
                 {item.category} · Prumo Construções
               </div>
-              <h3 className="text-sm font-extrabold text-[#072b59] tracking-tight">
+              <h3 className="text-sm font-extrabold text-[#072b59] tracking-tight leading-snug truncate">
                 {item.title}
               </h3>
               <p className="text-xs text-brand-text-dark leading-relaxed">
@@ -177,6 +221,54 @@ export default function GalleryViewer() {
           </div>
         ))}
       </div>
+
+      {/* Lightbox Modal for Zooming Portfolio Image */}
+      {selectedItem && (
+        <div
+          onClick={() => {
+            setSelectedItem(null);
+            setIsPaused(false);
+          }}
+          className="fixed inset-0 z-50 bg-[#041e42]/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-sky-200 rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl cursor-default"
+          >
+            <div className="relative aspect-[16/10] w-full bg-sky-50">
+              <img
+                src={selectedItem.url}
+                alt={selectedItem.alt}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+              <div className="space-y-1 text-left">
+                <span className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-extrabold">
+                  {selectedItem.category} · Prumo Construções
+                </span>
+                <h4 className="text-base md:text-lg font-extrabold text-[#041e42]">
+                  {selectedItem.title}
+                </h4>
+                <p className="text-xs text-[#1e3a5f] leading-relaxed">
+                  {selectedItem.desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedItem(null);
+                  setIsPaused(false);
+                }}
+                className="bg-[#041e42] hover:bg-[#0893E6] text-white px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

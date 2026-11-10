@@ -27,10 +27,10 @@ export default function ServicesShowcase() {
             <div
               key={service.id}
               id={`service-card-${service.id}`}
-              className="group rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-lg bg-white text-[#041e42] border border-[#cbe2ff] hover:border-[#0066cc]"
+              className="group rounded-2xl p-5 flex flex-col justify-start transition-all duration-200 shadow-sm hover:shadow-lg bg-white text-[#041e42] border border-[#cbe2ff] hover:border-[#0066cc]"
             >
               {/* Image box - Rounded Rectangular */}
-              <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-5 border border-[#d4e6ff] bg-sky-50">
+              <div className="relative aspect-[16/10] shrink-0 overflow-hidden rounded-xl mb-5 border border-[#d4e6ff] bg-sky-50">
                 <img
                   src={service.image}
                   alt={service.name}
@@ -40,14 +40,14 @@ export default function ServicesShowcase() {
               </div>
 
               {/* Content box */}
-              <div className="flex-1 flex flex-col justify-between">
+              <div className="flex-1 flex flex-col justify-start">
                 <div className="space-y-3">
-                  {/* Title and Icon */}
-                  <div className="flex items-center gap-3">
+                  {/* Title and Icon - Fixed min-h so descriptions align across cards */}
+                  <div className="flex items-center gap-3 min-h-[3.25rem]">
                     <span className="px-2.5 py-2 rounded-lg shrink-0 bg-[#eef6ff] text-[#0066cc]">
                       <IconComponent className="w-5 h-5" />
                     </span>
-                    <h3 className="font-extrabold text-base md:text-lg tracking-tight text-[#041e42]">
+                    <h3 className="font-extrabold text-base md:text-lg tracking-tight leading-snug text-[#041e42]">
                       {service.name}
                     </h3>
                   </div>

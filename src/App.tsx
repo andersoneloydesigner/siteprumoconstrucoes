@@ -13,7 +13,8 @@ import {
   Eye,
   Heart,
   Check,
-  BadgeCheck
+  BadgeCheck,
+  Instagram
 } from "lucide-react";
 import { APP_DETAILS, IMAGES, TESTIMONIALS, DIFFERENTIALS } from "./constants";
 
@@ -23,6 +24,7 @@ import GalleryViewer from "./components/GalleryViewer";
 import BeforeAfterSlider from "./components/BeforeAfterSlider";
 import ContactForm from "./components/ContactForm";
 import OfficialPagesModal from "./components/OfficialPagesModal";
+import WhatsAppIcon from "./components/WhatsAppIcon";
 
 const PIKA_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -36,10 +38,13 @@ const sectionRevealProps = {
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [testimonialPaused, setTestimonialPaused] = useState<boolean>(false);
+  const [testimonialDragging, setTestimonialDragging] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("#inicio");
   const testimonialTrackRef = useRef<HTMLDivElement>(null);
   const testimonialGroupRef = useRef<HTMLDivElement>(null);
   const testimonialOffsetRef = useRef<number>(0);
+  const testimonialDragStartXRef = useRef<number>(0);
+  const testimonialDragStartOffsetRef = useRef<number>(0);
 
   // Official Pages Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,7 +153,7 @@ export default function App() {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
-      if (!testimonialPaused && testimonialTrackRef.current && testimonialGroupRef.current) {
+      if (!testimonialPaused && !testimonialDragging && testimonialTrackRef.current && testimonialGroupRef.current) {
         const groupWidth = testimonialGroupRef.current.offsetWidth;
         if (groupWidth > 0) {
           testimonialOffsetRef.current += speed * dt;
@@ -164,7 +169,75 @@ export default function App() {
 
     animationFrameId = requestAnimationFrame(animateTestimonials);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [testimonialPaused]);
+  }, [testimonialPaused, testimonialDragging]);
+
+  // ScrollSpy to automatically highlight the active section in the floating header
+  useEffect(() => {
+    const sectionIds = ["#inicio", "#sobre", "#servicos", "#diferenciais", "#galeria", "#comparacao", "#contato"];
+    const handleScrollSpy = () => {
+      const scrollPosition = window.scrollY + 180;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.querySelector(sectionIds[i]);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          if (scrollPosition >= top) {
+            setActiveTab(sectionIds[i]);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollSpy, { passive: true });
+    return () => window.removeEventListener("scroll", handleScrollSpy);
+  }, []);
+
+  const handleTestimonialMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setTestimonialDragging(true);
+    setTestimonialPaused(true);
+    testimonialDragStartXRef.current = e.pageX;
+    testimonialDragStartOffsetRef.current = testimonialOffsetRef.current;
+  };
+
+  const handleTestimonialMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!testimonialDragging || !testimonialTrackRef.current || !testimonialGroupRef.current) return;
+    e.preventDefault();
+    const groupWidth = testimonialGroupRef.current.offsetWidth;
+    if (groupWidth <= 0) return;
+    const deltaX = e.pageX - testimonialDragStartXRef.current;
+    let nextOffset = (testimonialDragStartOffsetRef.current - deltaX) % groupWidth;
+    if (nextOffset < 0) nextOffset += groupWidth;
+    testimonialOffsetRef.current = nextOffset;
+    testimonialTrackRef.current.style.transform = `translate3d(-${testimonialOffsetRef.current}px, 0, 0)`;
+  };
+
+  const handleTestimonialTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+    setTestimonialDragging(true);
+    setTestimonialPaused(true);
+    testimonialDragStartXRef.current = e.touches[0].pageX;
+    testimonialDragStartOffsetRef.current = testimonialOffsetRef.current;
+  };
+
+  const handleTestimonialTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!testimonialDragging || !testimonialTrackRef.current || !testimonialGroupRef.current || e.touches.length !== 1) return;
+    const groupWidth = testimonialGroupRef.current.offsetWidth;
+    if (groupWidth <= 0) return;
+    const deltaX = e.touches[0].pageX - testimonialDragStartXRef.current;
+    let nextOffset = (testimonialDragStartOffsetRef.current - deltaX) % groupWidth;
+    if (nextOffset < 0) nextOffset += groupWidth;
+    testimonialOffsetRef.current = nextOffset;
+    testimonialTrackRef.current.style.transform = `translate3d(-${testimonialOffsetRef.current}px, 0, 0)`;
+  };
+
+  const handleTestimonialMouseUp = (leaveContainer: boolean) => {
+    if (testimonialDragging) {
+      setTestimonialDragging(false);
+    }
+    if (leaveContainer) {
+      setTestimonialPaused(false);
+    }
+  };
 
   const openOfficialPage = (type: "abnt" | "terms" | "privacy") => {
     setModalType(type);
@@ -191,30 +264,33 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-[#041e42] flex flex-col selection:bg-[#0893E6] selection:text-white">
       
-      {/* 1. Header/TopNavBar - Centered Container with Exact Logo Blue (#0893E6) and Borderless Logo */}
-      <nav aria-label="Main Navigation" className="bg-[#0893E6] text-white fixed top-3 md:top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] max-w-7xl z-40 rounded-2xl shadow-lg">
-        <div className="flex justify-between items-center h-20 md:h-22 px-5 md:px-8 w-full gap-4 xl:gap-6">
+      {/* 1. Header/TopNavBar - Compact Centered Floating Solid Container */}
+      <nav
+        aria-label="Main Navigation"
+        className="bg-[#0893E6] text-white fixed top-3 inset-x-0 mx-auto w-[calc(100%-2rem)] lg:w-max max-w-[calc(100%-2rem)] z-40 rounded-2xl shadow-lg"
+      >
+        <div className="flex justify-between items-center h-14 md:h-15 px-4 md:px-5 w-full gap-2.5 xl:gap-4">
           
-          {/* Logo Brand Image - No border, blends seamlessly with #0893E6 */}
+          {/* Logo Brand Image */}
           <a href="#inicio" onClick={(e) => scrollToSection(e, "#inicio")} className="flex items-center group shrink-0">
             <img 
               alt="Prumo Construções Logo" 
-              className="key-logo h-14 md:h-18 w-auto object-contain transition-transform duration-150 group-hover:scale-[1.02]" 
+              className="key-logo h-10 md:h-11 w-auto object-contain rounded-lg translate-y-1.5 transition-transform duration-150 group-hover:scale-[1.02]" 
               src={IMAGES.logo}
               referrerPolicy="no-referrer"
             />
           </a>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center justify-center gap-2 xl:gap-4 text-xs uppercase tracking-wider font-bold">
+          <div className="hidden lg:flex items-center justify-center gap-0.5 xl:gap-1.5 text-[10px] xl:text-[11px] uppercase tracking-wider font-bold">
             {navLinks.map((link) => (
               <a
                 key={link.id}
                 href={link.id}
                 onClick={(e) => scrollToSection(e, link.id)}
-                className={`transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 px-3 py-2 rounded-xl ${
+                className={`transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg ${
                   activeTab === link.id
-                    ? "bg-white/15 text-white font-extrabold"
+                    ? "bg-white/25 text-white font-extrabold shadow-2xs"
                     : "text-white hover:bg-white/15"
                 }`}
               >
@@ -223,10 +299,10 @@ export default function App() {
             ))}
           </div>
 
-          {/* Desktop CTA Action - No Icons, Uppercase Text */}
+          {/* Desktop CTA Action - Compact, Proportional, Uppercase Text */}
           <button 
             onClick={handleWhatsAppDirect}
-            className="hidden md:inline-flex items-center justify-center bg-[#041e42] text-white px-5 py-3 rounded-xl text-xs tracking-wider uppercase font-extrabold hover:bg-[#072b59] transition-all duration-150 active:translate-y-px shadow-md whitespace-nowrap shrink-0 cursor-pointer"
+            className="hidden md:inline-flex items-center justify-center bg-[#041e42] text-white px-3.5 py-1.5 rounded-lg text-[10px] xl:text-[11px] tracking-wider uppercase font-extrabold hover:bg-[#072b59] transition-all duration-150 active:translate-y-px shadow-sm whitespace-nowrap shrink-0 cursor-pointer"
           >
             <span>Solicitar Orçamento</span>
           </button>
@@ -235,15 +311,15 @@ export default function App() {
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
             aria-label="Alternar Menu"
-            className="lg:hidden text-white hover:bg-white/15 rounded-lg cursor-pointer transition-colors p-2"
+            className="lg:hidden text-white hover:bg-white/15 rounded-lg cursor-pointer transition-colors p-1.5"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#0893E6] border-t border-white/20 rounded-b-2xl text-xs uppercase tracking-wider font-bold divide-y divide-white/15 py-3 px-6">
+          <div className="lg:hidden bg-[#0893E6] border-t border-white/20 rounded-b-2xl text-xs uppercase tracking-wider font-bold divide-y divide-white/15 py-3 px-5">
             {navLinks.map((link) => (
               <a 
                 key={link.id}
@@ -265,7 +341,7 @@ export default function App() {
                   setMobileMenuOpen(false);
                   handleWhatsAppDirect();
                 }}
-                className="w-full bg-[#041e42] text-white py-3 px-4 rounded-xl font-extrabold flex items-center justify-center hover:bg-[#072b59] transition-all text-xs uppercase tracking-wider cursor-pointer"
+                className="w-full bg-[#041e42] text-white py-2.5 px-4 rounded-lg font-extrabold flex items-center justify-center hover:bg-[#072b59] transition-all text-xs uppercase tracking-wider cursor-pointer"
               >
                 <span>Solicitar Orçamento</span>
               </button>
@@ -354,7 +430,7 @@ export default function App() {
                 <a 
                   href="#galeria"
                   onClick={(e) => scrollToSection(e, "#galeria")}
-                  className="w-full sm:w-auto bg-[#041e42] text-white px-8 py-4 rounded-xl hover:bg-[#0893E6] transition-all flex items-center justify-center cursor-pointer font-extrabold uppercase tracking-wider whitespace-nowrap shadow-lg"
+                  className="w-full sm:w-auto bg-white/95 text-[#041e42] border-2 border-[#0066cc] px-8 py-4 rounded-xl hover:bg-[#041e42] hover:text-white transition-all flex items-center justify-center cursor-pointer font-extrabold uppercase tracking-wider whitespace-nowrap shadow-md"
                 >
                   Ver Projetos & Obras
                 </a>
@@ -591,9 +667,17 @@ export default function App() {
 
             {/* Continuously Moving Horizontal Cards Carousel */}
             <div 
-              className="relative w-full overflow-hidden py-2 select-none"
+              className={`relative w-full overflow-hidden py-2 select-none ${
+                testimonialDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
               onMouseEnter={() => setTestimonialPaused(true)}
-              onMouseLeave={() => setTestimonialPaused(false)}
+              onMouseLeave={() => handleTestimonialMouseUp(true)}
+              onMouseDown={handleTestimonialMouseDown}
+              onMouseMove={handleTestimonialMouseMove}
+              onMouseUp={() => handleTestimonialMouseUp(false)}
+              onTouchStart={handleTestimonialTouchStart}
+              onTouchMove={handleTestimonialTouchMove}
+              onTouchEnd={() => handleTestimonialMouseUp(true)}
             >
               <div
                 ref={testimonialTrackRef}
@@ -619,7 +703,8 @@ export default function App() {
                                 src={t.avatar}
                                 alt={t.name}
                                 loading="lazy"
-                                className="w-14 h-14 rounded-full object-cover border-2 border-[#0893E6] shrink-0 shadow-xs"
+                                draggable={false}
+                                className="w-14 h-14 rounded-full object-cover border-2 border-[#0893E6] shrink-0 shadow-xs pointer-events-none select-none"
                                 referrerPolicy="no-referrer"
                               />
                             )}
@@ -672,24 +757,74 @@ export default function App() {
           </motion.div>
         </section>
 
-        {/* 9. Contato Section */}
+        {/* 9. Contato Section - Left Titles & Right WhatsApp Form */}
         <section id="contato" className="py-20 bg-white border-b border-sky-100">
-          <motion.div {...sectionRevealProps} className="max-w-7xl mx-auto px-6 space-y-12">
+          <motion.div
+            {...sectionRevealProps}
+            className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center"
+          >
             
-            {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
-                Atendimento Rápido
-              </p>
-              <h2 className="text-2xl md:text-4xl font-extrabold text-[#041e42] tracking-tight [text-wrap:balance]">
-                Solicite Seu Orçamento <span className="text-[#0893E6]">Sem Compromisso</span>
-              </h2>
-              <p className="text-xs md:text-sm text-[#1e3a5f] leading-relaxed font-medium">
-                Estamos prontos para planejar e executar seu projeto residencial ou comercial em qualquer município de Santa Catarina.
-              </p>
+            {/* Left Side: Header Titles & Trust Highlights */}
+            <div className="lg:col-span-5 text-left space-y-6">
+              <div className="space-y-4">
+                <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
+                  Atendimento Rápido
+                </p>
+                <h2 className="text-2xl md:text-4xl font-extrabold text-[#041e42] tracking-tight leading-tight [text-wrap:balance]">
+                  Solicite Seu Orçamento <span className="text-[#0893E6]">Sem Compromisso</span>
+                </h2>
+                <p className="text-xs md:text-sm text-[#1e3a5f] leading-relaxed font-medium">
+                  Estamos prontos para planejar e executar seu projeto residencial ou comercial em qualquer município de Santa Catarina. Preencha os dados ao lado para enviar sua solicitação diretamente para o nosso WhatsApp.
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2 border-t border-sky-100">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
+                      Garantia Estrutural de 5 Anos
+                    </h4>
+                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
+                      Execução técnica em conformidade com as normas ABNT e Código Civil.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
+                      Retorno Rápido via WhatsApp
+                    </h4>
+                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
+                      Atendimento direto com nossos responsáveis técnicos para tirar dúvidas e agendar vistorias.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
+                      Atendimento em Toda Santa Catarina
+                    </h4>
+                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
+                      Equipe própria e estruturada para obras residenciais, comerciais e reformas em qualquer cidade de SC.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="max-w-5xl mx-auto">
+            {/* Right Side: Interactive WhatsApp Form */}
+            <div className="lg:col-span-7 w-full">
               <ContactForm />
             </div>
 
@@ -712,25 +847,40 @@ export default function App() {
               />
             </div>
             
-            <div className="text-white/95 font-sans max-w-md leading-relaxed space-y-1">
+            <div className="text-white/95 font-sans max-w-md leading-relaxed space-y-1.5">
               <p>{APP_DETAILS.address}</p>
               <p>
-                <strong>Administrador Geral:</strong> {APP_DETAILS.generalManager} · <strong>Técnico Responsável:</strong> {APP_DETAILS.technicalResponsible}
+                <strong>Administrador Geral:</strong> {APP_DETAILS.generalManager}
               </p>
               <p>
-                <strong>Tel / WhatsApp:</strong> {APP_DETAILS.phone} · <strong>E-mail:</strong> {APP_DETAILS.email}
+                <strong>Técnico Responsável:</strong> {APP_DETAILS.technicalResponsible}
               </p>
               <p>
-                <strong>Instagram:</strong>{" "}
+                <strong>Tel:</strong> {APP_DETAILS.phone}
+              </p>
+              <p>
+                <strong>E-mail:</strong> {APP_DETAILS.email}
+              </p>
+              <div className="flex items-center gap-3 pt-1.5">
                 <a
                   href={APP_DETAILS.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline hover:text-white"
+                  aria-label="Instagram Prumo Construções"
+                  className="inline-flex items-center justify-center p-2 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-white"
                 >
-                  {APP_DETAILS.instagramHandle}
+                  <Instagram className="w-5 h-5 text-white shrink-0" />
                 </a>
-              </p>
+                <a
+                  href={`https://api.whatsapp.com/send?phone=${APP_DETAILS.phoneRaw}&text=${encodeURIComponent("Olá Prumo Construções! Gostaria de solicitar um orçamento para minha obra.")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp Prumo Construções"
+                  className="inline-flex items-center justify-center p-2 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-white"
+                >
+                  <WhatsAppIcon className="w-5 h-5 fill-white shrink-0" />
+                </a>
+              </div>
             </div>
 
             <p className="text-[10px] text-white/85 font-mono pt-2">
@@ -782,15 +932,15 @@ export default function App() {
         onClose={() => setIsModalOpen(false)} 
       />
 
-      {/* Floating Action Button - No Icon, Uppercase Text */}
+      {/* Floating WhatsApp Action Button */}
       <a
         href={`https://api.whatsapp.com/send?phone=${APP_DETAILS.phoneRaw}&text=${encodeURIComponent("Olá Prumo Construções! Gostaria de solicitar um orçamento para minha obra.")}`}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Solicitar Orçamento"
-        className="fixed bottom-6 right-6 z-50 bg-[#041e42] hover:bg-[#0066cc] text-white px-5 py-3.5 rounded-2xl shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center border-2 border-white group text-xs font-extrabold uppercase tracking-wider"
+        aria-label="Atendimento via WhatsApp"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#1ebe5d] text-white p-4 rounded-full shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center border-2 border-white group"
       >
-        <span>Solicitar Orçamento</span>
+        <WhatsAppIcon className="w-7 h-7 md:w-8 md:h-8 fill-white" />
       </a>
 
     </div>

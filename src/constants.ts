@@ -5,6 +5,22 @@
 
 import { ConstructionService, GalleryItem, Testimonial } from "./types";
 
+import obraAntesMesmaCasa from "./assets/images/obra_antes_mesma_casa_1794319720381.jpg";
+import obraDepoisConcluida from "./assets/images/obra_depois_concluida_1794270936903.jpg";
+import obraResidencialAlvenaria from "./assets/images/obra_residencial_alvenaria_1794270928634.jpg";
+import obraFundacaoConcretagem from "./assets/images/obra_fundacao_concretagem_1794270930307.jpg";
+import obraFachadaModerna from "./assets/images/obra_fachada_moderna_1794270931585.jpg";
+import obraReformaInteriores from "./assets/images/obra_reforma_interiores_1794270933063.jpg";
+import obraEstruturaComercial from "./assets/images/obra_estrutura_comercial_1794270934295.jpg";
+import obraAcabamentoGourmet from "./assets/images/obra_acabamento_gourmet_1794270934598.jpg";
+
+import clienteCarlosEduardo from "./assets/images/cliente_carlos_eduardo_1794318144152.jpg";
+import clienteMarianaAlvez from "./assets/images/cliente_mariana_alvez_1794318147343.jpg";
+import clienteAfonsoGuimaraes from "./assets/images/cliente_afonso_guimaraes_1794318145526.jpg";
+import clienteFernandaRocha from "./assets/images/cliente_fernanda_rocha_1794318146863.jpg";
+import clienteRicardoMenezes from "./assets/images/cliente_ricardo_menezes_1794318149767.jpg";
+import clientePatriciaLima from "./assets/images/cliente_patricia_lima_1794318149329.jpg";
+
 export const APP_DETAILS = {
   name: "Prumo Construções",
   phone: "(48) 99829-2637",
@@ -14,9 +30,9 @@ export const APP_DETAILS = {
   hours: "Segunda a Sábado - 07:30 às 18:30",
   email: "prumoempreendimento@gmail.com",
   instagramUrl: "https://www.instagram.com/prumo_construcoes/",
-  instagramHandle: "@prumo_construcoes",
+  instagramHandle: "prumo_construcoes",
   generalManager: "Ernani José",
-  technicalResponsible: "Wellisson (@wellisson_762)",
+  technicalResponsible: "Wellisson",
   slogan: "Construindo com qualidade, realizando sonhos.",
   tagline: "Do alicerce ao acabamento com precisão e solidez.",
   subtagline: "Obras residenciais, comerciais e reformas em geral.",
@@ -35,17 +51,17 @@ export const APP_DETAILS = {
 
 export const IMAGES = {
   logo: "/logo-prumo-clean.png",
-  beforeImage: "/src/assets/images/obra_antes_mesma_casa_1794319720381.jpg",
-  afterImage: "/src/assets/images/obra_depois_concluida_1794270936903.jpg",
+  beforeImage: obraAntesMesmaCasa,
+  afterImage: obraDepoisConcluida,
   gallery: [
-    "/src/assets/images/obra_residencial_alvenaria_1794270928634.jpg",
-    "/src/assets/images/obra_fundacao_concretagem_1794270930307.jpg",
-    "/src/assets/images/obra_fachada_moderna_1794270931585.jpg",
-    "/src/assets/images/obra_reforma_interiores_1794270933063.jpg",
-    "/src/assets/images/obra_estrutura_comercial_1794270934295.jpg",
-    "/src/assets/images/obra_acabamento_gourmet_1794270934598.jpg",
-    "/src/assets/images/obra_antes_mesma_casa_1794319720381.jpg",
-    "/src/assets/images/obra_depois_concluida_1794270936903.jpg"
+    obraResidencialAlvenaria,
+    obraFundacaoConcretagem,
+    obraFachadaModerna,
+    obraReformaInteriores,
+    obraEstruturaComercial,
+    obraAcabamentoGourmet,
+    obraAntesMesmaCasa,
+    obraDepoisConcluida
   ]
 };
 
@@ -55,42 +71,42 @@ export const SERVICES: ConstructionService[] = [
     name: "Construção de Residências",
     description: "Execução completa de obras residenciais da fundação ao acabamento final, prezando pelo alto padrão estrutural e rigor técnico.",
     detailedDesc: "Edificação de casas e sobrados com acompanhamento rigoroso em todas as fases. Garantimos infraestruturas robustas, fundações calculadas e alvenaria impecável para transformar seu projeto em lar.",
-    image: "/src/assets/images/obra_fachada_moderna_1794270931585.jpg"
+    image: obraFachadaModerna
   },
   {
     id: "reformas",
     name: "Reformas Residenciais e Comerciais",
     description: "Reformas residenciais, comerciais e prediais com otimização de ambientes e total renovação estrutural e estética.",
     detailedDesc: "Reestruturação completa de espaços, trocas de pisos e revestimentos, ampliações e modernização de fachadas. Executamos sua reforma com mínimo impacto na rotina e máximo aproveitamento de espaço.",
-    image: "/src/assets/images/obra_depois_concluida_1794270936903.jpg"
+    image: obraDepoisConcluida
   },
   {
     id: "alvenaria",
     name: "Alvenaria Estrutural e Concretagem",
     description: "Elevação de paredes, pilares, vigas, lajes e concretagem técnica de alto desempenho estrutural.",
     detailedDesc: "Construção de paredes estruturais e de vedação com travamento correto, alinhamento milimétrico no prumo e formas reforçadas para concretagem de lajes, vigas e baldrame.",
-    image: "/src/assets/images/obra_residencial_alvenaria_1794270928634.jpg"
+    image: obraResidencialAlvenaria
   },
   {
     id: "acabamentos",
     name: "Acabamentos, Pisos e Porcelanatos",
     description: "Assentamento de porcelanatos, cerâmicas, pastilhas e acabamentos finos de alta precisão.",
     detailedDesc: "Nivelamento a laser de pisos, contrapiso técnico, cortes em 45 graus, rejuntamento fino e aplicação de revestimentos de alto padrão em salas, cozinhas, fachadas e áreas gourmet.",
-    image: "/src/assets/images/obra_reforma_interiores_1794270933063.jpg"
+    image: obraReformaInteriores
   },
   {
     id: "fundacoes",
     name: "Fundações e Estruturas Comerciais",
     description: "Execução de fundações profundas e rasas, armaduras de aço e estruturas para galpões e prédios comerciais.",
     detailedDesc: "Sapatas, blocos de coroamento, vigas baldrame e estruturas mistas com rigoroso controle de qualidade do concreto e ferragem para edificações seguras e duráveis.",
-    image: "/src/assets/images/obra_fundacao_concretagem_1794270930307.jpg"
+    image: obraFundacaoConcretagem
   },
   {
     id: "areas-gourmet",
     name: "Áreas Gourmet, Drywall e Pintura",
     description: "Na Prumo Construções, transformamos e valorizamos espaços com áreas de lazer completas, forros em drywall e pintura técnica.",
     detailedDesc: "Construção de espaços gourmet, churrasqueiras revestidas, forros e divisórias em drywall, emassamento e pintura acrílica premium com acabamento impecável.",
-    image: "/src/assets/images/obra_acabamento_gourmet_1794270934598.jpg"
+    image: obraAcabamentoGourmet
   }
 ];
 
@@ -133,7 +149,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Carlos Eduardo M.",
     location: "Florianópolis, SC",
     role: "Construção Residencial",
-    avatar: "/src/assets/images/cliente_carlos_eduardo_1794318144152.jpg",
+    avatar: clienteCarlosEduardo,
     text: "Contratamos a Prumo Construções para a execução da nossa residência. Do alicerce ao acabamento, a equipe demonstrou extremo profissionalismo, pontualidade e transparência. O resultado superou nossas expectativas!",
     rating: 5,
     date: "Julho de 2026"
@@ -143,7 +159,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Mariana Alvez",
     location: "Joinville, SC",
     role: "Reforma Comercial",
-    avatar: "/src/assets/images/cliente_mariana_alvez_1794318147343.jpg",
+    avatar: clienteMarianaAlvez,
     text: "A Prumo Construções executou a reforma completa do nosso espaço comercial. Cumprimento rigoroso do prazo combinado e qualidade técnica impecável nos pisos de porcelanato e pintura. Recomendo fortemente!",
     rating: 5,
     date: "Junho de 2026"
@@ -153,7 +169,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Afonso Guimarães",
     location: "Itajaí, SC",
     role: "Fundação & Estrutura",
-    avatar: "/src/assets/images/cliente_afonso_guimaraes_1794318145526.jpg",
+    avatar: clienteAfonsoGuimaraes,
     text: "Trabalho excepcional de fundação, alvenaria e concretagem. A equipe da Prumo Construções é muito organizada, limpa e dedicada. Ter a garantia de entrega no prazo nos deu total tranquilidade.",
     rating: 5,
     date: "Maio de 2026"
@@ -163,7 +179,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Fernanda Rocha",
     location: "Balneário Camboriú, SC",
     role: "Acabamentos & Interiores",
-    avatar: "/src/assets/images/cliente_fernanda_rocha_1794318146863.jpg",
+    avatar: clienteFernandaRocha,
     text: "Ficamos encantados com o cuidado nos detalhes do porcelanato e forro de gesso. A equipe manteve a obra limpa todos os dias e cumpriu cada etapa exatamente como planejado no cronograma.",
     rating: 5,
     date: "Abril de 2026"
@@ -173,7 +189,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Ricardo Menezes",
     location: "Blumenau, SC",
     role: "Sobrado Alto Padrão",
-    avatar: "/src/assets/images/cliente_ricardo_menezes_1794318149767.jpg",
+    avatar: clienteRicardoMenezes,
     text: "Excelência técnica de verdade. A estrutura ficou impecável no prumo e o acompanhamento semanal nos trouxe total segurança durante toda a construção do nosso sobrado.",
     rating: 5,
     date: "Março de 2026"
@@ -183,7 +199,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Patrícia Lima",
     location: "São José, SC",
     role: "Área Gourmet & Reforma",
-    avatar: "/src/assets/images/cliente_patricia_lima_1794318149329.jpg",
+    avatar: clientePatriciaLima,
     text: "Construíram nossa área gourmet e reformaram toda a fachada da casa. Atendimento atencioso, orçamento claro sem surpresas e acabamento de primeiríssima qualidade!",
     rating: 5,
     date: "Fevereiro de 2026"
