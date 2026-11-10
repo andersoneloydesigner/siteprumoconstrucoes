@@ -1,0 +1,8 @@
+{
+  "name": "PRUMO CONSTRUÇÕES",
+  "description": "Empresa de construção civil e empreiteira especializada na gestão e execução de obras residenciais e comerciais. Do alicerce ao acabamento, garantimos prazos, qualidade e excelência na entrega de cada projeto.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
