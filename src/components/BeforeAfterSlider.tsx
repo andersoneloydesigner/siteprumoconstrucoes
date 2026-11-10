@@ -67,8 +67,8 @@ export default function BeforeAfterSlider({
             {/* Click to Reveal Overlay (when blurred) */}
             {!isRevealed && (
               <div className="absolute inset-0 bg-white/45 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center z-20 transition-opacity duration-200">
-                <div className="flex items-center justify-center bg-[#0893E6] text-white hover:bg-[#067ac2] px-5 py-3 rounded-xl shadow-lg transition-transform duration-150 group-hover:scale-105 active:scale-95">
-                  <span className="text-[10px] md:text-xs font-extrabold uppercase tracking-wider font-sans whitespace-nowrap">
+                <div className="w-full sm:w-auto flex items-center justify-center bg-[#0893E6] text-white hover:bg-[#067ac2] px-6 py-4 sm:py-3 min-h-[54px] sm:min-h-0 rounded-2xl sm:rounded-xl shadow-lg transition-transform duration-150 group-hover:scale-105 active:scale-95">
+                  <span className="text-xs font-extrabold uppercase tracking-wider font-sans whitespace-nowrap">
                     Clique para ver o resultado
                   </span>
                 </div>

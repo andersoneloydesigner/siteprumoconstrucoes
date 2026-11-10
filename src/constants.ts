@@ -14,6 +14,14 @@ import obraReformaInteriores from "./assets/images/obra_reforma_interiores_17942
 import obraEstruturaComercial from "./assets/images/obra_estrutura_comercial_1794270934295.jpg";
 import obraAcabamentoGourmet from "./assets/images/obra_acabamento_gourmet_1794270934598.jpg";
 
+// High-impact newly generated portfolio images
+import fundacaoObraPesada from "./assets/images/fundacao_obra_pesada_1794342607172.jpg";
+import casaPiscinaFinalizada from "./assets/images/casa_piscina_finalizada_1794342645175.jpg";
+import concretagemFundacaoSc from "./assets/images/concretagem_fundacao_sc_1794342623569.jpg";
+import casaModernaPronta from "./assets/images/casa_moderna_pronta_1794342606889.jpg";
+import lajeConcretoArmado from "./assets/images/laje_concreto_armado_1794342645480.jpg";
+import sobradoContemporaneo from "./assets/images/sobrado_contemporaneo_1794342624489.jpg";
+
 import clienteCarlosEduardo from "./assets/images/cliente_carlos_eduardo_1794318144152.jpg";
 import clienteMarianaAlvez from "./assets/images/cliente_mariana_alvez_1794318147343.jpg";
 import clienteAfonsoGuimaraes from "./assets/images/cliente_afonso_guimaraes_1794318145526.jpg";
@@ -54,14 +62,16 @@ export const IMAGES = {
   beforeImage: obraAntesMesmaCasa,
   afterImage: obraDepoisConcluida,
   gallery: [
-    obraResidencialAlvenaria,
-    obraFundacaoConcretagem,
-    obraFachadaModerna,
+    casaPiscinaFinalizada,
+    fundacaoObraPesada,
+    casaModernaPronta,
+    concretagemFundacaoSc,
+    sobradoContemporaneo,
+    lajeConcretoArmado,
+    obraAcabamentoGourmet,
     obraReformaInteriores,
     obraEstruturaComercial,
-    obraAcabamentoGourmet,
-    obraAntesMesmaCasa,
-    obraDepoisConcluida
+    obraResidencialAlvenaria
   ]
 };
 
@@ -208,44 +218,54 @@ export const TESTIMONIALS: Testimonial[] = [
 
 const GALLERY_DESCRIPTIONS = [
   {
-    title: "Alvenaria Estrutural & Lajes",
-    category: "Obras Residenciais",
-    desc: "Execução de alvenaria, pilares e formas de madeira com rigoroso alinhamento e segurança."
+    title: "Residência Contemporânea com Piscina de Borda Infinita",
+    category: "Obra Concluída",
+    desc: "Execução completa de alto padrão com piscina em balanço, deck em madeira nobre e integração arquitetônica com vista para o mar."
   },
   {
-    title: "Fundações & Armaduras de Aço",
-    category: "Infraestrutura & Concreto",
-    desc: "Malha de aço e vigas baldrame dimensionadas para máxima solidez estrutural."
+    title: "Fundações Profundas & Armaduras Estruturais",
+    category: "Engenharia & Fundações",
+    desc: "Montagem técnica de gaiolas de ferro para sapatas, formas de vigas baldrame e topografia a laser de alta precisão."
   },
   {
-    title: "Residência Contemporânea Alto Padrão",
-    category: "Obras Concluídas",
-    desc: "Acabamento externo em branco e revestimentos nobres com guarda-corpo em vidro."
+    title: "Mansão Contemporânea Alto Padrão",
+    category: "Obra Concluída",
+    desc: "Projeto executado com grandes panos de vidro, iluminação cênica em LED e revestimentos nobres em pedra natural."
+  },
+  {
+    title: "Concretagem Técnica de Vigas Baldrame & Sapatas",
+    category: "Fundações & Estrutura",
+    desc: "Aplicação de concreto usinado com caminhão lança e adensamento por agulha vibratória para máxima solidez estrutural."
+  },
+  {
+    title: "Sobrado Residencial de Luxo",
+    category: "Obra Concluída",
+    desc: "Edificação de dois pavimentos com brises amadeirados, esquadrias pretas em alumínio e paisagismo integrado."
+  },
+  {
+    title: "Concretagem de Laje Maciça & Eletrodutos Técnicos",
+    category: "Estrutura & Engenharia",
+    desc: "Armação de aço nervurada, passagens de tubulações elétricas conferidas e nivelamento de superfície a laser."
+  },
+  {
+    title: "Espaço Gourmet & Área de Lazer",
+    category: "Reformas & Lazer",
+    desc: "Bancadas em granito escovado, revestimentos cerâmicos e iluminação arquitetônica integrada."
   },
   {
     title: "Assentamento de Porcelanato & Drywall",
-    category: "Acabamentos Internos",
-    desc: "Nivelamento a laser para grandes formatos e forro de gesso acartonado com iluminação."
+    category: "Acabamentos Finos",
+    desc: "Nivelamento a laser para grandes formatos, cortes em meia-esquadria 45° e forro de gesso acartonado com sancas."
   },
   {
-    title: "Edificação Comercial & Estrutura Mista",
+    title: "Edificação Comercial & Cobertura Metálica",
     category: "Obras Comerciais",
-    desc: "Pilares de concreto armado e estrutura metálica de cobertura para grandes vãos."
+    desc: "Pilares de concreto armado e estrutura mista para galpão corporativo com grandes vãos livres."
   },
   {
-    title: "Espaço Gourmet & Área Externa",
-    category: "Reformas & Lazer",
-    desc: "Bancadas em granito, revestimentos cerâmicos e iluminação arquitetônica integrada."
-  },
-  {
-    title: "Levantamento Estrutural Residencial",
+    title: "Alvenaria Estrutural & Amarração Técnica",
     category: "Alvenaria & Estrutura",
-    desc: "Fase estrutural de sobrado residencial com vigamento e alvenaria de vedação."
-  },
-  {
-    title: "Fachada Residencial Finalizada",
-    category: "Obra Entregue",
-    desc: "Entrega completa com pintura impermeabilizante, esquadrias e paisagismo."
+    desc: "Elevação no prumo milimétrico, vergas e contravergas reforçadas para absoluta estabilidade predial."
   }
 ];
 

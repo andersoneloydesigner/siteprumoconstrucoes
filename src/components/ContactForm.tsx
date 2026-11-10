@@ -47,7 +47,7 @@ export default function ContactForm() {
   };
 
   return (
-    <div id="contato-oficial-dados" className="w-full border border-[#cbe2ff] bg-[#eef6ff] rounded-2xl p-6 md:p-8 lg:p-10 shadow-md">
+    <div id="contato-oficial-dados" className="w-full border border-[#cbe2ff] bg-[#eef6ff] rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-md">
       <form onSubmit={handleSubmitWhatsApp} className="space-y-5 font-sans">
         <div className="space-y-1 border-b border-[#cbe2ff] pb-4">
           <span className="font-mono text-[10px] uppercase tracking-widest text-[#0066cc] font-extrabold">
@@ -140,12 +140,12 @@ export default function ContactForm() {
           />
         </div>
 
-        <div className="pt-2 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center w-full">
           <button
             type="submit"
-            className="w-full bg-[#0066cc] text-white py-4 px-6 rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center font-extrabold shadow-lg shadow-[#0066cc]/25 cursor-pointer text-xs uppercase tracking-wider active:translate-y-px whitespace-nowrap"
+            className="w-full bg-[#0066cc] text-white py-5 sm:py-4 px-6 min-h-[58px] sm:min-h-0 rounded-2xl sm:rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center font-extrabold shadow-lg shadow-[#0066cc]/25 cursor-pointer text-xs uppercase tracking-wider active:translate-y-px whitespace-nowrap"
           >
-            <span>Enviar Orçamento pelo WhatsApp</span>
+            <span className="text-xs">Enviar Orçamento pelo WhatsApp</span>
           </button>
           <span className="text-[11px] text-[#041e42] font-mono font-semibold mt-2.5 text-center lowercase">
             *orçamento sem custo • consultar taxa de deslocamento

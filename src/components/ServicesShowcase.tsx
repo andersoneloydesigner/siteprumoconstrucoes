@@ -64,11 +64,11 @@ export default function ServicesShowcase() {
       </div>
 
       {/* Standard Section CTA Button Below Cards */}
-      <div className="flex justify-center pt-2">
+      <div className="flex justify-center pt-2 w-full">
         <button
           type="button"
           onClick={handleServiceQuote}
-          className="bg-[#0066cc] text-white px-8 py-4 rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center active:translate-y-px cursor-pointer text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-[#0066cc]/25 whitespace-nowrap"
+          className="w-full sm:w-auto bg-[#0066cc] text-white px-8 py-5 sm:py-4 min-h-[58px] sm:min-h-0 rounded-2xl sm:rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center active:translate-y-px cursor-pointer text-sm sm:text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-[#0066cc]/25 whitespace-nowrap"
         >
           <span>Solicitar Orçamento</span>
         </button>

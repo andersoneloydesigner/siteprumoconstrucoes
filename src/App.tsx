@@ -335,13 +335,13 @@ export default function App() {
                 {link.label}
               </a>
             ))}
-            <div className="pt-4 pb-2">
+            <div className="pt-4 pb-2 w-full">
               <button 
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleWhatsAppDirect();
                 }}
-                className="w-full bg-[#041e42] text-white py-2.5 px-4 rounded-lg font-extrabold flex items-center justify-center hover:bg-[#072b59] transition-all text-xs uppercase tracking-wider cursor-pointer"
+                className="w-full bg-[#041e42] text-white py-4 px-5 min-h-[54px] rounded-xl font-extrabold flex items-center justify-center hover:bg-[#072b59] transition-all text-sm uppercase tracking-wider cursor-pointer shadow-md"
               >
                 <span>Solicitar Orçamento</span>
               </button>
@@ -408,17 +408,17 @@ export default function App() {
               Especialistas em obras residenciais, comerciais, estruturas e reformas em Santa Catarina. Do alicerce ao acabamento fino com rigor no prumo e entrega no prazo!
             </motion.p>
 
-            {/* Action CTAs - Contrasting Blue Shades */}
+            {/* Action CTAs - Contrasting Blue Shades, Full Width & Larger Touch Target on Mobile */}
             <motion.div 
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.12, ease: PIKA_EASE }}
-              className="mt-7 flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-lg text-xs uppercase font-bold"
+              className="mt-7 flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:max-w-lg text-sm sm:text-xs uppercase font-bold"
             >
               <div className="w-full sm:w-auto flex flex-col items-center">
                 <button 
                   onClick={handleWhatsAppDirect}
-                  className="w-full sm:w-auto bg-[#0066cc] text-white px-8 py-4 rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center active:translate-y-px cursor-pointer font-extrabold uppercase tracking-wider shadow-lg shadow-[#0066cc]/30 whitespace-nowrap"
+                  className="w-full sm:w-auto bg-[#0066cc] text-white px-8 py-5 sm:py-4 min-h-[58px] sm:min-h-0 rounded-2xl sm:rounded-xl hover:bg-[#041e42] transition-all flex items-center justify-center active:translate-y-px cursor-pointer font-extrabold uppercase tracking-wider shadow-lg shadow-[#0066cc]/30 whitespace-nowrap"
                 >
                   <span>Solicitar Orçamento Grátis</span>
                 </button>
@@ -430,7 +430,7 @@ export default function App() {
                 <a 
                   href="#galeria"
                   onClick={(e) => scrollToSection(e, "#galeria")}
-                  className="w-full sm:w-auto bg-white/95 text-[#041e42] border-2 border-[#0066cc] px-8 py-4 rounded-xl hover:bg-[#041e42] hover:text-white transition-all flex items-center justify-center cursor-pointer font-extrabold uppercase tracking-wider whitespace-nowrap shadow-md"
+                  className="w-full sm:w-auto bg-white/95 text-[#041e42] border-2 border-[#0066cc] px-8 py-5 sm:py-4 min-h-[58px] sm:min-h-0 rounded-2xl sm:rounded-xl hover:bg-[#041e42] hover:text-white transition-all flex items-center justify-center cursor-pointer font-extrabold uppercase tracking-wider whitespace-nowrap shadow-md"
                 >
                   Ver Projetos & Obras
                 </a>

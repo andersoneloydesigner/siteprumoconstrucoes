@@ -208,13 +208,13 @@ export default function GalleryViewer() {
 
             {/* Caption Footer - Top-aligned right below image so all cards align */}
             <div className="pt-4 px-2 pb-2 bg-white space-y-1.5 flex-1 flex flex-col justify-start text-left">
-              <div className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-bold truncate">
+              <div className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-extrabold truncate">
                 {item.category} · Prumo Construções
               </div>
-              <h3 className="text-sm font-extrabold text-[#072b59] tracking-tight leading-snug truncate">
+              <h3 className="text-sm font-extrabold text-[#041e42] tracking-tight leading-snug line-clamp-2 min-h-[2.6rem]">
                 {item.title}
               </h3>
-              <p className="text-xs text-brand-text-dark leading-relaxed">
+              <p className="text-xs text-[#1e3a5f] leading-relaxed line-clamp-3">
                 {item.desc}
               </p>
             </div>
@@ -261,7 +261,7 @@ export default function GalleryViewer() {
                   setSelectedItem(null);
                   setIsPaused(false);
                 }}
-                className="bg-[#041e42] hover:bg-[#0893E6] text-white px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0"
+                className="w-full sm:w-auto bg-[#041e42] hover:bg-[#0893E6] text-white px-6 py-4 sm:py-2.5 min-h-[54px] sm:min-h-0 rounded-2xl sm:rounded-xl text-sm sm:text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0"
               >
                 Fechar
               </button>
