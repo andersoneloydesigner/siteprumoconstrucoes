@@ -192,7 +192,7 @@ export default function GalleryViewer() {
             key={item.id || index}
             onClick={() => handleImageClick(item)}
             title="Arraste para o lado ou clique para ampliar"
-            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 border border-sky-100 rounded-2xl bg-white p-3 transition-all duration-200 hover:border-[#0893E6] hover:shadow-md overflow-hidden group shadow-xs flex flex-col justify-start text-left"
+            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 border border-sky-100 rounded-2xl bg-white p-2.5 transition-all duration-200 hover:border-[#0893E6] hover:shadow-lg overflow-hidden group shadow-sm flex flex-col justify-start cursor-pointer"
           >
             {/* Image Frame - Rectangular with Rounded Borders */}
             <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-xl bg-sky-50">
@@ -205,19 +205,6 @@ export default function GalleryViewer() {
                 referrerPolicy="no-referrer"
               />
             </div>
-
-            {/* Caption Footer - Top-aligned right below image so all cards align */}
-            <div className="pt-4 px-2 pb-2 bg-white space-y-1.5 flex-1 flex flex-col justify-start text-left">
-              <div className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-extrabold truncate">
-                {item.category} · Prumo Construções
-              </div>
-              <h3 className="text-sm font-extrabold text-[#041e42] tracking-tight leading-snug line-clamp-2 min-h-[2.6rem]">
-                {item.title}
-              </h3>
-              <p className="text-xs text-[#1e3a5f] leading-relaxed line-clamp-3">
-                {item.desc}
-              </p>
-            </div>
           </div>
         ))}
       </div>
@@ -229,7 +216,7 @@ export default function GalleryViewer() {
             setSelectedItem(null);
             setIsPaused(false);
           }}
-          className="fixed inset-0 z-50 bg-[#041e42]/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 cursor-pointer"
+          className="fixed inset-0 z-50 bg-[#041e42]/85 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -243,18 +230,7 @@ export default function GalleryViewer() {
                 referrerPolicy="no-referrer"
               />
             </div>
-            <div className="p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
-              <div className="space-y-1 text-left">
-                <span className="text-[10px] font-mono text-[#0893E6] uppercase tracking-wider font-extrabold">
-                  {selectedItem.category} · Prumo Construções
-                </span>
-                <h4 className="text-base md:text-lg font-extrabold text-[#041e42]">
-                  {selectedItem.title}
-                </h4>
-                <p className="text-xs text-[#1e3a5f] leading-relaxed">
-                  {selectedItem.desc}
-                </p>
-              </div>
+            <div className="p-4 md:p-5 flex items-center justify-end bg-white">
               <button
                 type="button"
                 onClick={() => {
