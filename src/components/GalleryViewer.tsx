@@ -192,19 +192,16 @@ export default function GalleryViewer() {
             key={item.id || index}
             onClick={() => handleImageClick(item)}
             title="Arraste para o lado ou clique para ampliar"
-            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 border border-sky-100 rounded-2xl bg-white p-2.5 transition-all duration-200 hover:border-[#0893E6] hover:shadow-lg overflow-hidden group shadow-sm flex flex-col justify-start cursor-pointer"
+            className="w-[82vw] sm:w-[54vw] md:w-[42vw] lg:w-[32vw] xl:w-[28vw] shrink-0 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group cursor-pointer aspect-[16/10] relative bg-slate-900/10"
           >
-            {/* Image Frame - Rectangular with Rounded Borders */}
-            <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-xl bg-sky-50">
-              <img
-                src={item.url}
-                alt={item.alt || `Obra Prumo Construções ${index + 1}`}
-                loading="lazy"
-                draggable={false}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04] pointer-events-none select-none"
-                referrerPolicy="no-referrer"
-              />
-            </div>
+            <img
+              src={item.url}
+              alt={item.alt || `Obra Prumo Construções ${index + 1}`}
+              loading="lazy"
+              draggable={false}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05] pointer-events-none select-none"
+              referrerPolicy="no-referrer"
+            />
           </div>
         ))}
       </div>
@@ -216,28 +213,26 @@ export default function GalleryViewer() {
             setSelectedItem(null);
             setIsPaused(false);
           }}
-          className="fixed inset-0 z-50 bg-[#041e42]/85 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 cursor-pointer"
+          className="fixed inset-0 z-50 bg-[#041e42]/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white border border-sky-200 rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl cursor-default"
+            className="relative bg-black rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl cursor-default"
           >
-            <div className="relative aspect-[16/10] w-full bg-sky-50">
+            <div className="relative aspect-[16/10] w-full">
               <img
                 src={selectedItem.url}
                 alt={selectedItem.alt}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-            </div>
-            <div className="p-4 md:p-5 flex items-center justify-end bg-white">
               <button
                 type="button"
                 onClick={() => {
                   setSelectedItem(null);
                   setIsPaused(false);
                 }}
-                className="w-full sm:w-auto bg-[#041e42] hover:bg-[#0893E6] text-white px-6 py-4 sm:py-2.5 min-h-[54px] sm:min-h-0 rounded-2xl sm:rounded-xl text-sm sm:text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0"
+                className="absolute top-4 right-4 bg-[#041e42]/85 hover:bg-[#0893E6] text-white px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shadow-lg backdrop-blur-xs"
               >
                 Fechar
               </button>
