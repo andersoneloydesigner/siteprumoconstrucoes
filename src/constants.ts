@@ -22,6 +22,16 @@ import casaModernaPronta from "./assets/images/casa_moderna_pronta_1794342606889
 import lajeConcretoArmado from "./assets/images/laje_concreto_armado_1794342645480.jpg";
 import sobradoContemporaneo from "./assets/images/sobrado_contemporaneo_1794342624489.jpg";
 
+// Real client project photos executed by Prumo Construções
+import obraRealFachada from "./assets/images/obra_real_fachada_alvenaria.jpeg";
+import obraRealSalaLareira from "./assets/images/obra_real_sala_lareira.jpeg";
+import obraRealCozinhaIntegrada from "./assets/images/obra_real_cozinha_integrada.jpeg";
+import obraRealEscadaMetalica from "./assets/images/obra_real_escada_metalica.jpeg";
+import obraRealBancadaConcreto from "./assets/images/obra_real_bancada_concreto.jpeg";
+import obraRealMezaninoLaje from "./assets/images/obra_real_mezanino_laje.jpeg";
+import obraRealLivingIntegrado from "./assets/images/obra_real_living_integrado.jpeg";
+import obraRealSalaJantar from "./assets/images/obra_real_sala_jantar.jpeg";
+
 import clienteCarlosEduardo from "./assets/images/cliente_carlos_eduardo_1794318144152.jpg";
 import clienteMarianaAlvez from "./assets/images/cliente_mariana_alvez_1794318147343.jpg";
 import clienteAfonsoGuimaraes from "./assets/images/cliente_afonso_guimaraes_1794318145526.jpg";
@@ -62,16 +72,20 @@ export const IMAGES = {
   beforeImage: obraAntesMesmaCasa,
   afterImage: obraDepoisConcluida,
   gallery: [
+    obraRealFachada,
+    obraRealSalaLareira,
+    obraRealCozinhaIntegrada,
+    obraRealEscadaMetalica,
+    obraRealBancadaConcreto,
+    obraRealMezaninoLaje,
+    obraRealLivingIntegrado,
+    obraRealSalaJantar,
     casaPiscinaFinalizada,
     fundacaoObraPesada,
     casaModernaPronta,
     concretagemFundacaoSc,
     sobradoContemporaneo,
-    lajeConcretoArmado,
-    obraAcabamentoGourmet,
-    obraReformaInteriores,
-    obraEstruturaComercial,
-    obraResidencialAlvenaria
+    lajeConcretoArmado
   ]
 };
 
@@ -218,6 +232,46 @@ export const TESTIMONIALS: Testimonial[] = [
 
 const GALLERY_DESCRIPTIONS = [
   {
+    title: "Fachada em Alvenaria Estrutural Aparente",
+    category: "Obra Entregue",
+    desc: "Execução arquitetônica em blocos de concreto com amarração impecável e esquadrias de alto padrão."
+  },
+  {
+    title: "Living Integrado com Lareira & Concreto Aparente",
+    category: "Obra Entregue",
+    desc: "Ambiente sofisticado com lareira embutida, laje maciça em concreto aparente e iluminação técnica por trilhos."
+  },
+  {
+    title: "Cozinha com Ilha em Concreto & Sala Ampla",
+    category: "Obra Entregue",
+    desc: "Conceito aberto integrando cozinha gourmet com bancada moldada em concreto, piso em grandes formatos e alvenaria aparente."
+  },
+  {
+    title: "Escada Suspensa em Aço & Madeira com Pé-Direito Duplo",
+    category: "Design & Estrutura",
+    desc: "Estrutura metálica engastada com degraus em madeira nobre e pele de vidro trazendo iluminação natural."
+  },
+  {
+    title: "Bancada Moldada em Concreto & Conceito Aberto",
+    category: "Espaço Gourmet",
+    desc: "Acabamento primoroso na bancada de concreto executada in loco e integração total com as áreas de convívio."
+  },
+  {
+    title: "Mezanino Estrutural & Guarda-Corpo Metálico",
+    category: "Estrutura & Engenharia",
+    desc: "Transição de pavimentos com vigas em aço, guarda-corpo industrial preto e laje de concreto usinado."
+  },
+  {
+    title: "Ambiente Integrado com Painel de TV & Lareira",
+    category: "Obra Entregue",
+    desc: "Distribuição harmoniosa de sala e jantar com portas de correr conectando diretamente ao jardim."
+  },
+  {
+    title: "Sala de Jantar & Acabamento Industrial Sofisticado",
+    category: "Obra Entregue",
+    desc: "Piso porcelanato acetinado em grandes dimensões com rodapés e esquadrias de máxima precisão."
+  },
+  {
     title: "Residência Contemporânea com Piscina de Borda Infinita",
     category: "Obra Concluída",
     desc: "Execução completa de alto padrão com piscina em balanço, deck em madeira nobre e integração arquitetônica com vista para o mar."
@@ -234,7 +288,7 @@ const GALLERY_DESCRIPTIONS = [
   },
   {
     title: "Concretagem Técnica de Vigas Baldrame & Sapatas",
-    category: "Fundações & Estrutura",
+    category: "Fundações & Concreto",
     desc: "Aplicação de concreto usinado com caminhão lança e adensamento por agulha vibratória para máxima solidez estrutural."
   },
   {
@@ -246,26 +300,6 @@ const GALLERY_DESCRIPTIONS = [
     title: "Concretagem de Laje Maciça & Eletrodutos Técnicos",
     category: "Estrutura & Engenharia",
     desc: "Armação de aço nervurada, passagens de tubulações elétricas conferidas e nivelamento de superfície a laser."
-  },
-  {
-    title: "Espaço Gourmet & Área de Lazer",
-    category: "Reformas & Lazer",
-    desc: "Bancadas em granito escovado, revestimentos cerâmicos e iluminação arquitetônica integrada."
-  },
-  {
-    title: "Assentamento de Porcelanato & Drywall",
-    category: "Acabamentos Finos",
-    desc: "Nivelamento a laser para grandes formatos, cortes em meia-esquadria 45° e forro de gesso acartonado com sancas."
-  },
-  {
-    title: "Edificação Comercial & Cobertura Metálica",
-    category: "Obras Comerciais",
-    desc: "Pilares de concreto armado e estrutura mista para galpão corporativo com grandes vãos livres."
-  },
-  {
-    title: "Alvenaria Estrutural & Amarração Técnica",
-    category: "Alvenaria & Estrutura",
-    desc: "Elevação no prumo milimétrico, vergas e contravergas reforçadas para absoluta estabilidade predial."
   }
 ];
 
