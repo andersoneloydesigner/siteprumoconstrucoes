@@ -25,6 +25,7 @@ import BeforeAfterSlider from "./components/BeforeAfterSlider";
 import ContactForm from "./components/ContactForm";
 import OfficialPagesModal from "./components/OfficialPagesModal";
 import WhatsAppIcon from "./components/WhatsAppIcon";
+import PlumbBob3DIntro from "./components/PlumbBob3DIntro";
 
 const PIKA_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -40,6 +41,8 @@ export default function App() {
   const [testimonialPaused, setTestimonialPaused] = useState<boolean>(false);
   const [testimonialDragging, setTestimonialDragging] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("#inicio");
+  const [showPlumbIntro, setShowPlumbIntro] = useState(true);
+  const [heroRevealed, setHeroRevealed] = useState(false);
   const testimonialTrackRef = useRef<HTMLDivElement>(null);
   const testimonialGroupRef = useRef<HTMLDivElement>(null);
   const testimonialOffsetRef = useRef<number>(0);
@@ -385,34 +388,66 @@ export default function App() {
             </div>
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 relative z-10 flex flex-col items-center justify-center text-center w-full">
+          {/* 3D Realistic Plumb Bob Intro Sequence (5 seconds: Fast Spin -> Slow Spin -> Rise to Top) */}
+          {showPlumbIntro && (
+            <PlumbBob3DIntro
+              onStartExit={() => setHeroRevealed(true)}
+              onComplete={() => {
+                setHeroRevealed(true);
+                setShowPlumbIntro(false);
+              }}
+            />
+          )}
+
+          <div
+            className={`max-w-7xl mx-auto px-6 py-12 md:py-16 relative z-10 flex flex-col items-center justify-center text-center w-full ${
+              heroRevealed ? "pointer-events-auto" : "pointer-events-none select-none"
+            }`}
+          >
             
-            {/* Core Display Headline in High-Contrast Deep Navy & Cobalt Blue */}
+            {/* Core Display Headline in High-Contrast Deep Navy & Cobalt Blue - Zoom Out Reveal */}
             <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: PIKA_EASE }}
+              initial={{ opacity: 0, scale: 1.32, filter: "blur(6px)" }}
+              animate={
+                heroRevealed
+                  ? { opacity: 1, scale: 1, filter: "blur(0px)" }
+                  : { opacity: 0, scale: 1.32, filter: "blur(6px)" }
+              }
+              transition={{ duration: 0.85, ease: PIKA_EASE }}
               className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#041e42] drop-shadow-[0_2px_10px_rgba(255,255,255,0.9)] max-w-5xl leading-tight md:leading-[1.1] [text-wrap:balance]"
             >
-              Prumo Construções <br />
-              <span className="text-[#0066cc]">{APP_DETAILS.slogan}</span>
+              <span className="block text-4xl sm:text-6xl md:text-7xl uppercase tracking-wider font-black text-[#0893E6] drop-shadow-[0_2px_12px_rgba(8,147,230,0.28)]">
+                PRUMO
+              </span>
+              <span className="block text-xl sm:text-3xl md:text-4xl uppercase tracking-[0.18em] font-extrabold text-[#041e42] mt-1 mb-2">
+                Construções
+              </span>
+              <span className="block text-[#0066cc]">{APP_DETAILS.slogan}</span>
             </motion.h1>
  
-            {/* Subtitle in Deep Blue */}
+            {/* Subtitle in Deep Blue - Zoom Out Reveal */}
             <motion.p 
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.06, ease: PIKA_EASE }}
+              initial={{ opacity: 0, scale: 1.24, filter: "blur(5px)" }}
+              animate={
+                heroRevealed
+                  ? { opacity: 1, scale: 1, filter: "blur(0px)" }
+                  : { opacity: 0, scale: 1.24, filter: "blur(5px)" }
+              }
+              transition={{ duration: 0.85, delay: 0.1, ease: PIKA_EASE }}
               className="text-sm md:text-lg text-[#041e42] mt-5 max-w-3xl leading-relaxed font-sans font-semibold"
             >
               Especialistas em obras residenciais, comerciais, estruturas e reformas em Santa Catarina. Do alicerce ao acabamento fino com rigor no prumo e entrega no prazo!
             </motion.p>
 
-            {/* Action CTAs - Contrasting Blue Shades, Full Width & Larger Touch Target on Mobile */}
+            {/* Action CTAs - Contrasting Blue Shades, Full Width & Larger Touch Target on Mobile - Zoom Out Reveal */}
             <motion.div 
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.12, ease: PIKA_EASE }}
+              initial={{ opacity: 0, scale: 1.18, filter: "blur(4px)" }}
+              animate={
+                heroRevealed
+                  ? { opacity: 1, scale: 1, filter: "blur(0px)" }
+                  : { opacity: 0, scale: 1.18, filter: "blur(4px)" }
+              }
+              transition={{ duration: 0.85, delay: 0.18, ease: PIKA_EASE }}
               className="mt-7 flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:max-w-lg text-sm sm:text-xs uppercase font-bold"
             >
               <div className="w-full sm:w-auto flex flex-col items-center">
