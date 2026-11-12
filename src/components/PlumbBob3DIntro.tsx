@@ -218,8 +218,8 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
     // 3. Camera Setup
     const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
     const isMobile = width < 640;
-    camera.position.set(0, -0.1, isMobile ? 10.2 : 8.7);
-    camera.lookAt(0, -0.25, 0);
+    camera.position.set(0, 0.15, isMobile ? 11.0 : 9.6);
+    camera.lookAt(0, 0.10, 0);
 
     // 4. Balanced 3-Point Warm/Cool Studio Lighting Rig
     const hemiLight = new THREE.HemisphereLight(0xeef6ff, 0x1e3a5f, 0.88);
@@ -370,11 +370,8 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
 
     const frontUpperDecal = new THREE.Mesh(upperBandDecalGeo, engravingMat);
     frontUpperDecal.position.y = 0.56;
-    const backUpperDecal = new THREE.Mesh(upperBandDecalGeo, engravingMat);
-    backUpperDecal.position.y = 0.56;
-    backUpperDecal.rotation.y = Math.PI;
 
-    suspendedBobGroup.add(frontUpperDecal, backUpperDecal);
+    suspendedBobGroup.add(frontUpperDecal);
 
     // --- PART 2: Knurled / Faceted Steel Top Retaining Nut ("Porca Rosqueada Superior") ---
     const nutGeo = new THREE.CylinderGeometry(0.19, 0.20, 0.14, 16);
@@ -420,32 +417,6 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
     cordMesh.position.y = 1.22 + 9.0;
     suspendedBobGroup.add(cordMesh);
 
-    // --- PART 4: Soft Radial Contact Grounding Shadow Disc Below Sharp Conical Tip ---
-    const shadowCanvas = document.createElement("canvas");
-    shadowCanvas.width = 256;
-    shadowCanvas.height = 256;
-    const shCtx = shadowCanvas.getContext("2d")!;
-    const radGrad = shCtx.createRadialGradient(128, 128, 8, 128, 128, 118);
-    radGrad.addColorStop(0.0, "rgba(4, 30, 66, 0.36)");
-    radGrad.addColorStop(0.45, "rgba(8, 147, 230, 0.15)");
-    radGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
-    shCtx.fillStyle = radGrad;
-    shCtx.fillRect(0, 0, 256, 256);
-
-    const shadowTex = new THREE.CanvasTexture(shadowCanvas);
-    shadowTex.colorSpace = THREE.SRGBColorSpace;
-    const shadowPlaneGeo = new THREE.PlaneGeometry(3.2, 3.2);
-    shadowPlaneGeo.rotateX(-Math.PI / 2);
-    const shadowPlaneMat = new THREE.MeshBasicMaterial({
-      map: shadowTex,
-      transparent: true,
-      depthWrite: false,
-      opacity: 0.0,
-    });
-    const shadowPlaneMesh = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
-    shadowPlaneMesh.position.set(0, -2.68, 0);
-    scene.add(shadowPlaneMesh);
-
     // Pre-compile shaders on hardware GPUs
     if (!isSoftwareGl) {
       renderer.compile(scene, camera);
@@ -457,7 +428,7 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
       const w = container.clientWidth || window.innerWidth;
       const h = container.clientHeight || window.innerHeight;
       camera.aspect = w / h;
-      camera.position.z = w < 640 ? 10.2 : 8.7;
+      camera.position.z = w < 640 ? 11.0 : 9.6;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
@@ -493,19 +464,17 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
       const now = performance.now();
       const elapsed = (now - startTime) / 1000; // Total elapsed seconds (0 -> 5.0s)
 
-      // --- 1. Natural Entrance Descent, Elastic Cord Settle & Upward Exit ---
+      // --- 1. Natural Entrance Descent (Elevated Center Position, No Overshoot Clipping) & Upward Exit ---
+      const restY = 0.85; // Elevated resting height in the upper-center of the Hero
       if (elapsed < 3.85) {
-        // Exponentially damped spring entrance from y = 8.5 down to y = 0
-        const entranceProgress = 1 - Math.exp(-elapsed * 3.8) * Math.cos(elapsed * 4.6);
-        const yPos = 8.5 * (1 - entranceProgress);
+        // Critically damped entrance from y = 8.5 down to restY = 0.85 (no downward overshoot)
+        const entranceProgress = Math.min(1, 1 - Math.exp(-elapsed * 3.8) * (1 + elapsed * 1.8));
+        const yPos = restY + (8.5 - restY) * (1 - entranceProgress);
         plumbAssembly.position.y = yPos;
 
-        // Subtle elastic cord stretch on the suspended steel bob as it brakes at the bottom of its descent
-        const cordStretch = Math.exp(-elapsed * 2.8) * Math.sin(elapsed * 6.5) * 0.12;
+        // Subtle elastic cord settle
+        const cordStretch = Math.exp(-elapsed * 3.2) * Math.sin(elapsed * 5.8) * 0.06;
         suspendedBobGroup.position.y = -4.5 - Math.max(0, cordStretch);
-
-        const shadowAlpha = THREE.MathUtils.clamp(1 - yPos / 5.0, 0, 1);
-        shadowPlaneMat.opacity = shadowAlpha * 0.84;
       } else {
         // Trigger Hero zoom-out text reveal as the plumb bob starts rising to the top
         if (!exitTriggered && elapsed >= 4.02) {
@@ -515,14 +484,13 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
 
         const tUp = Math.min(1, (elapsed - 3.85) / (5.0 - 3.85));
         const easeUp = tUp * tUp * (3 - 2 * tUp);
-        plumbAssembly.position.y = Math.pow(easeUp, 1.35) * 11.5;
+        plumbAssembly.position.y = restY + Math.pow(easeUp, 1.35) * 11.5;
         suspendedBobGroup.position.y = -4.5;
-        shadowPlaneMat.opacity = Math.max(0, (1 - tUp * 2.0) * 0.84);
       }
 
       // --- 2. Natural Torsional Cord Rotation Ending Dead-Center on "PRUMO / CONSTRUÇÕES" ---
-      const twistDecay = Math.exp(-elapsed * 1.18);
-      const naturalUntwist = -3.85 * twistDecay * Math.cos(elapsed * 0.85);
+      const twistDecay = Math.exp(-elapsed * 1.22);
+      const naturalUntwist = -1.95 * twistDecay * Math.cos(elapsed * 0.85);
       suspendedBobGroup.rotation.y = naturalUntwist;
 
       // --- 3. True Pendulum Swing from High Cord Pivot ("Entrando no Prumo") ---
@@ -531,10 +499,6 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
       const swingX = Math.cos(elapsed * 3.1) * 0.045 * pendulumDecay;
       pendulumPivotGroup.rotation.z = swingZ;
       pendulumPivotGroup.rotation.x = swingX;
-
-      // Move the ground contact shadow slightly with the conical tip
-      shadowPlaneMesh.position.x = Math.sin(swingZ) * 4.5;
-      shadowPlaneMesh.position.z = -Math.sin(swingX) * 4.5;
 
       renderer.render(scene, camera);
 
@@ -572,14 +536,11 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
       cordKnotGeo.dispose();
       cordGeo.dispose();
       cordMat.dispose();
-      shadowPlaneGeo.dispose();
-      shadowPlaneMat.dispose();
 
       steelColorTex.dispose();
       steelBumpTex.dispose();
       engravingTex.dispose();
       cordTex.dispose();
-      shadowTex.dispose();
       envTarget.dispose();
 
       renderer.dispose();
@@ -593,7 +554,7 @@ export default function PlumbBob3DIntro({ onStartExit, onComplete }: PlumbBob3DI
     <div
       ref={mountRef}
       aria-hidden="true"
-      className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+      className="fixed inset-0 z-[100] pointer-events-none overflow-visible"
     />
   );
 }

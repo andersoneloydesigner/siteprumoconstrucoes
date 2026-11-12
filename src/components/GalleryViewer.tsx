@@ -4,9 +4,12 @@
  */
 
 import React, { useRef, useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { GALLERY } from "../constants";
 import { GalleryItem } from "../types";
+
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function GalleryViewer() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -151,8 +154,12 @@ export default function GalleryViewer() {
   };
 
   return (
-    <div
-      className="relative w-full"
+    <motion.div
+      initial={{ opacity: 0, y: 34 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15, margin: "0px 0px -40px 0px" }}
+      transition={{ duration: 0.85, ease: SMOOTH_EASE }}
+      className="relative w-full will-change-transform"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => handleMouseUpOrLeave(true)}
     >
@@ -199,7 +206,7 @@ export default function GalleryViewer() {
               alt={item.alt || `Obra Prumo Construções ${index + 1}`}
               loading="lazy"
               draggable={false}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05] pointer-events-none select-none"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05] pointer-events-none select-none"
               referrerPolicy="no-referrer"
             />
           </div>
@@ -240,6 +247,6 @@ export default function GalleryViewer() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

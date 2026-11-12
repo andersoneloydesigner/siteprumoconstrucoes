@@ -27,13 +27,20 @@ import OfficialPagesModal from "./components/OfficialPagesModal";
 import WhatsAppIcon from "./components/WhatsAppIcon";
 import PlumbBob3DIntro from "./components/PlumbBob3DIntro";
 
-const PIKA_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const PIKA_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const sectionRevealProps = {
-  initial: { opacity: 0, y: 22 },
+  initial: { opacity: 0, y: 36 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.1 },
-  transition: { duration: 0.45, ease: PIKA_EASE },
+  viewport: { once: true, amount: 0.12, margin: "0px 0px -50px 0px" },
+  transition: { duration: 0.82, ease: PIKA_EASE },
+};
+
+const headerRevealProps = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2, margin: "0px 0px -40px 0px" },
+  transition: { duration: 0.78, ease: PIKA_EASE },
 };
 
 export default function App() {
@@ -53,31 +60,55 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"abnt" | "terms" | "privacy" | null>(null);
 
-  // Responsive, low-latency smooth wheel scrolling
+  // Shared smooth scroll state so wheel inertia and anchor link navigation stay 100% synchronized
+  const smoothScrollRef = useRef<{
+    targetY: number;
+    currentY: number;
+    rafId: number | null;
+    isAnimating: boolean;
+    lastTime: number;
+    startSmoothLoop: () => void;
+  }>({
+    targetY: 0,
+    currentY: 0,
+    rafId: null,
+    isAnimating: false,
+    lastTime: 0,
+    startSmoothLoop: () => {},
+  });
+
+  // Fluid, inertial Lenis-grade smooth scrolling for wheel & anchor navigation
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let targetScrollY = window.scrollY;
-    let currentScrollY = window.scrollY;
-    let rafId: number | null = null;
-    let isWheelScrolling = false;
-    let lastTime = performance.now();
+    const state = smoothScrollRef.current;
+    state.targetY = window.scrollY;
+    state.currentY = window.scrollY;
 
     const updateScroll = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.05);
-      lastTime = now;
-      const diff = targetScrollY - currentScrollY;
+      const dt = Math.min((now - state.lastTime) / 1000, 0.05);
+      state.lastTime = now;
+      const diff = state.targetY - state.currentY;
 
-      if (Math.abs(diff) > 0.5) {
-        const alpha = 1 - Math.exp(-18 * dt);
-        currentScrollY += diff * alpha;
-        window.scrollTo(0, currentScrollY);
-        rafId = requestAnimationFrame(updateScroll);
+      if (Math.abs(diff) > 0.2) {
+        // Silky-smooth exponential damping (lower factor = smoother, longer glide)
+        const alpha = 1 - Math.exp(-10.5 * dt);
+        state.currentY += diff * alpha;
+        window.scrollTo(0, state.currentY);
+        state.rafId = requestAnimationFrame(updateScroll);
       } else {
-        currentScrollY = targetScrollY;
-        window.scrollTo(0, targetScrollY);
-        isWheelScrolling = false;
-        rafId = null;
+        state.currentY = state.targetY;
+        window.scrollTo(0, state.targetY);
+        state.isAnimating = false;
+        state.rafId = null;
+      }
+    };
+
+    state.startSmoothLoop = () => {
+      state.isAnimating = true;
+      if (!state.rafId) {
+        state.lastTime = performance.now();
+        state.rafId = requestAnimationFrame(updateScroll);
       }
     };
 
@@ -85,26 +116,33 @@ export default function App() {
       if (isModalOpen) return;
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
+      // Allow native scrolling inside scrollable child elements (e.g. textareas)
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest("textarea")) return;
+
       e.preventDefault();
-      if (!isWheelScrolling) {
-        targetScrollY = window.scrollY;
-        currentScrollY = window.scrollY;
-        isWheelScrolling = true;
+      if (!state.isAnimating) {
+        state.targetY = window.scrollY;
+        state.currentY = window.scrollY;
       }
+
+      // Normalize delta across pixel (trackpad) and line (mouse wheel) modes
+      const rawDelta =
+        e.deltaMode === 1
+          ? e.deltaY * 38
+          : e.deltaMode === 2
+          ? e.deltaY * window.innerHeight * 0.85
+          : e.deltaY;
 
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      targetScrollY = Math.max(0, Math.min(maxScroll, targetScrollY + e.deltaY));
-
-      if (!rafId) {
-        lastTime = performance.now();
-        rafId = requestAnimationFrame(updateScroll);
-      }
+      state.targetY = Math.max(0, Math.min(maxScroll, state.targetY + rawDelta));
+      state.startSmoothLoop();
     };
 
     const handleNativeScroll = () => {
-      if (!isWheelScrolling) {
-        targetScrollY = window.scrollY;
-        currentScrollY = window.scrollY;
+      if (!state.isAnimating) {
+        state.targetY = window.scrollY;
+        state.currentY = window.scrollY;
       }
     };
 
@@ -114,7 +152,7 @@ export default function App() {
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("scroll", handleNativeScroll);
-      if (rafId) cancelAnimationFrame(rafId);
+      if (state.rafId) cancelAnimationFrame(state.rafId);
     };
   }, [isModalOpen]);
 
@@ -125,25 +163,15 @@ export default function App() {
     if (!targetEl) return;
 
     const headerOffset = 88;
-    const startY = window.scrollY;
-    const endY = Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY - headerOffset);
-    const distance = endY - startY;
-    const duration = 480;
-    let startTime: number | null = null;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const endY = Math.max(0, Math.min(maxScroll, targetEl.getBoundingClientRect().top + window.scrollY - headerOffset));
 
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      window.scrollTo(0, startY + distance * easeOutCubic(progress));
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-
-    requestAnimationFrame(step);
+    const state = smoothScrollRef.current;
+    if (!state.isAnimating) {
+      state.currentY = window.scrollY;
+    }
+    state.targetY = endY;
+    state.startSmoothLoop();
   }, []);
 
   // Continuous sideways motion for Testimonials carousel
@@ -267,6 +295,17 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-[#041e42] flex flex-col selection:bg-[#0893E6] selection:text-white">
       
+      {/* 3D Realistic Plumb Bob Intro Sequence Rendered In Front of ALL Elements (Hero & Header) */}
+      {showPlumbIntro && (
+        <PlumbBob3DIntro
+          onStartExit={() => setHeroRevealed(true)}
+          onComplete={() => {
+            setHeroRevealed(true);
+            setShowPlumbIntro(false);
+          }}
+        />
+      )}
+
       {/* 1. Header/TopNavBar - Compact Centered Floating Solid Container */}
       <nav
         aria-label="Main Navigation"
@@ -388,17 +427,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* 3D Realistic Plumb Bob Intro Sequence (5 seconds: Fast Spin -> Slow Spin -> Rise to Top) */}
-          {showPlumbIntro && (
-            <PlumbBob3DIntro
-              onStartExit={() => setHeroRevealed(true)}
-              onComplete={() => {
-                setHeroRevealed(true);
-                setShowPlumbIntro(false);
-              }}
-            />
-          )}
-
           <div
             className={`max-w-7xl mx-auto px-6 py-12 md:py-16 relative z-10 flex flex-col items-center justify-center text-center w-full ${
               heroRevealed ? "pointer-events-auto" : "pointer-events-none select-none"
@@ -416,13 +444,8 @@ export default function App() {
               transition={{ duration: 0.85, ease: PIKA_EASE }}
               className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#041e42] drop-shadow-[0_2px_10px_rgba(255,255,255,0.9)] max-w-5xl leading-tight md:leading-[1.1] [text-wrap:balance]"
             >
-              <span className="block text-4xl sm:text-6xl md:text-7xl uppercase tracking-wider font-black text-[#0893E6] drop-shadow-[0_2px_12px_rgba(8,147,230,0.28)]">
-                PRUMO
-              </span>
-              <span className="block text-xl sm:text-3xl md:text-4xl uppercase tracking-[0.18em] font-extrabold text-[#041e42] mt-1 mb-2">
-                Construções
-              </span>
-              <span className="block text-[#0066cc]">{APP_DETAILS.slogan}</span>
+              Prumo Construções <br />
+              <span className="text-[#0066cc]">{APP_DETAILS.slogan}</span>
             </motion.h1>
  
             {/* Subtitle in Deep Blue - Zoom Out Reveal */}
@@ -480,54 +503,69 @@ export default function App() {
 
         {/* 3. Sobre Nós / História Section - Clean Text on White Background without Outer Boxes */}
         <section id="sobre" className="pt-10 pb-20 bg-white border-b border-sky-100">
-          <motion.div {...sectionRevealProps} className="max-w-7xl mx-auto px-6 space-y-12">
+          <div className="max-w-7xl mx-auto px-6 space-y-12">
             
-            {/* Fast Stats Row - Unboxed Text on White Background */}
+            {/* Fast Stats Row - Smooth Staggered Reveal */}
             <div className="w-full max-w-5xl mx-auto py-2 grid grid-cols-2 md:grid-cols-4 gap-6 justify-center border-b border-sky-100 pb-10">
-              <div className="text-center">
-                <span className="block text-2xl md:text-3xl font-extrabold text-[#041e42] font-sans tracking-tight tabular-nums">100%</span>
-                <span className="block text-[10px] font-mono uppercase text-[#0066cc] font-bold tracking-widest mt-1">Rigor Técnico & Prumo</span>
-              </div>
-              <div className="text-center">
-                <span className="block text-2xl md:text-3xl font-extrabold text-[#041e42] font-sans tracking-tight">Toda SC</span>
-                <span className="block text-[10px] font-mono uppercase text-[#0066cc] font-bold tracking-widest mt-1">Atendimento Regional</span>
-              </div>
-              <div className="text-center">
-                <span className="block text-2xl md:text-3xl font-extrabold text-[#041e42] font-sans tracking-tight">No Prazo</span>
-                <span className="block text-[10px] font-mono uppercase text-[#0066cc] font-bold tracking-widest mt-1">Entrega Garantida</span>
-              </div>
-              <div className="text-center">
-                <span className="block text-2xl md:text-3xl font-extrabold text-[#041e42] font-sans tracking-tight">Grátis*</span>
-                <span className="block text-[10px] font-mono uppercase text-[#0066cc] font-bold tracking-widest mt-1">Orçamento Sem Custo</span>
-                <span className="block text-[9px] text-[#1e3a5f] font-mono mt-0.5 lowercase normal-case">consultar taxa de deslocamento</span>
-              </div>
+              {[
+                { value: "100%", label: "Rigor Técnico & Prumo" },
+                { value: "Toda SC", label: "Atendimento Regional" },
+                { value: "No Prazo", label: "Entrega Garantida" },
+                { value: "Grátis*", label: "Orçamento Sem Custo", sub: "consultar taxa de deslocamento" },
+              ].map((stat, idx) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 26 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.72, delay: idx * 0.08, ease: PIKA_EASE }}
+                  className="text-center will-change-transform"
+                >
+                  <span className="block text-2xl md:text-3xl font-extrabold text-[#041e42] font-sans tracking-tight tabular-nums">
+                    {stat.value}
+                  </span>
+                  <span className="block text-[10px] font-mono uppercase text-[#0066cc] font-bold tracking-widest mt-1">
+                    {stat.label}
+                  </span>
+                  {stat.sub && (
+                    <span className="block text-[9px] text-[#1e3a5f] font-mono mt-0.5 lowercase normal-case">
+                      {stat.sub}
+                    </span>
+                  )}
+                </motion.div>
+              ))}
             </div>
 
-            <div className="max-w-3xl mx-auto text-center space-y-3">
+            <motion.div {...headerRevealProps} className="max-w-3xl mx-auto text-center space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                 Identidade & Compromisso · Prumo Construções
               </p>
               <h2 className="text-2xl md:text-4xl font-extrabold text-[#041e42] tracking-tight [text-wrap:balance]">
                 Engenharia, Solidez e Compromisso Ético em <span className="text-[#0893E6]">Cada Obra</span>
               </h2>
-            </div>
+            </motion.div>
 
             {/* History Content - Unboxed Text on White Background */}
             <div className="max-w-4xl mx-auto space-y-10">
-              <p className="font-sans text-sm md:text-base text-[#041e42] font-medium leading-relaxed text-center">
-                {APP_DETAILS.history}
-              </p>
-
-              {/* Mission, Vision, Values Grid - Light Blue Boxes without Top Line */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.45, delay: 0.05, ease: PIKA_EASE }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2"
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.78, delay: 0.06, ease: PIKA_EASE }}
+                className="font-sans text-sm md:text-base text-[#041e42] font-medium leading-relaxed text-center"
               >
-                
-                <div className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5">
+                {APP_DETAILS.history}
+              </motion.p>
+
+              {/* Mission, Vision, Values Grid - Smooth Staggered Light Blue Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 28, scale: 0.985 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.75, delay: 0.05, ease: PIKA_EASE }}
+                  className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5 will-change-transform"
+                >
                   <div className="flex items-center gap-2 text-[#0066cc] font-mono text-xs font-extrabold uppercase">
                     <Target className="w-4 h-4" />
                     Missão
@@ -535,9 +573,15 @@ export default function App() {
                   <p className="text-xs text-[#041e42] leading-relaxed font-medium">
                     {APP_DETAILS.mission}
                   </p>
-                </div>
+                </motion.div>
 
-                <div className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5">
+                <motion.div
+                  initial={{ opacity: 0, y: 28, scale: 0.985 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.75, delay: 0.14, ease: PIKA_EASE }}
+                  className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5 will-change-transform"
+                >
                   <div className="flex items-center gap-2 text-[#0066cc] font-mono text-xs font-extrabold uppercase">
                     <Eye className="w-4 h-4" />
                     Visão
@@ -545,9 +589,15 @@ export default function App() {
                   <p className="text-xs text-[#041e42] leading-relaxed font-medium">
                     {APP_DETAILS.vision}
                   </p>
-                </div>
+                </motion.div>
 
-                <div className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5">
+                <motion.div
+                  initial={{ opacity: 0, y: 28, scale: 0.985 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.75, delay: 0.23, ease: PIKA_EASE }}
+                  className="bg-[#eef6ff] border border-[#cbe2ff] rounded-2xl p-6 space-y-2.5 will-change-transform"
+                >
                   <div className="flex items-center gap-2 text-[#0066cc] font-mono text-xs font-extrabold uppercase">
                     <Heart className="w-4 h-4" />
                     Valores
@@ -555,20 +605,19 @@ export default function App() {
                   <div className="text-xs text-[#041e42] leading-relaxed font-semibold">
                     {APP_DETAILS.values.join(" · ")}
                   </div>
-                </div>
-
-              </motion.div>
+                </motion.div>
+              </div>
             </div>
 
-          </motion.div>
+          </div>
         </section>
 
         {/* 4. Serviços Section - Soft Ice-Blue Canvas with High-Contrast Blue Accents */}
         <section id="servicos" className="py-20 bg-[#f2f8ff] border-b border-[#d4e6ff]">
-          <motion.div {...sectionRevealProps} className="max-w-7xl mx-auto px-6 space-y-12">
+          <div className="max-w-7xl mx-auto px-6 space-y-12">
             
             {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto space-y-3">
+            <motion.div {...headerRevealProps} className="text-center max-w-3xl mx-auto space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                 Especialidades em Construção Civil
               </p>
@@ -578,38 +627,38 @@ export default function App() {
               <p className="text-xs md:text-sm text-[#1e3a5f] leading-relaxed max-w-2xl mx-auto font-medium">
                 Mão de obra técnica altamente capacitada para erguer residências, executar reformas estruturais e garantir acabamentos finos do alicerce à entrega das chaves.
               </p>
-            </div>
+            </motion.div>
 
             {/* Services Grid */}
             <ServicesShowcase />
 
-          </motion.div>
+          </div>
         </section>
 
         {/* 5. Diferenciais Section - Multi-Tone Blue Bento Contrast */}
         <section id="diferenciais" className="py-20 bg-white border-b border-sky-100 relative overflow-hidden">
-          <motion.div {...sectionRevealProps} className="max-w-7xl mx-auto px-6 relative space-y-12">
+          <div className="max-w-7xl mx-auto px-6 relative space-y-12">
             
             {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto space-y-3">
+            <motion.div {...headerRevealProps} className="text-center max-w-3xl mx-auto space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                 Por Que Escolher a Nossa Equipe
               </p>
               <h2 className="text-2xl md:text-4xl font-extrabold text-[#041e42] tracking-tight [text-wrap:balance]">
                 Diferenciais da <span className="text-[#0893E6]">Prumo Construções</span>
               </h2>
-            </div>
+            </motion.div>
 
             {/* Differentials Grid */}
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
               {DIFFERENTIALS.map((item, idx) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 0.4, delay: idx * 0.04, ease: PIKA_EASE }}
-                  className="rounded-2xl p-7 text-left space-y-4 flex flex-col justify-between h-full transition-shadow shadow-sm hover:shadow-lg bg-[#0893E6] text-white border border-[#067ac2]"
+                  initial={{ opacity: 0, y: 32, scale: 0.98 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.14, margin: "0px 0px -40px 0px" }}
+                  transition={{ duration: 0.78, delay: (idx % 3) * 0.1, ease: PIKA_EASE }}
+                  className="rounded-2xl p-7 text-left space-y-4 flex flex-col justify-between h-full transition-shadow duration-300 shadow-sm hover:shadow-lg bg-[#0893E6] text-white border border-[#067ac2] will-change-transform"
                 >
                   <div className="space-y-3.5">
                     <div className="inline-flex items-center justify-center px-3.5 py-2 rounded-xl font-extrabold shadow-xs bg-[#041e42] text-white">
@@ -626,15 +675,15 @@ export default function App() {
               ))}
             </div>
 
-          </motion.div>
+          </div>
         </section>
 
         {/* 6. Portfólio de Obras Section */}
         <section id="galeria" className="py-20 bg-[#f2f8ff] border-b border-[#d4e6ff] overflow-hidden">
-          <motion.div {...sectionRevealProps} className="space-y-12">
+          <div className="space-y-12">
             
             {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto px-6 space-y-3">
+            <motion.div {...headerRevealProps} className="text-center max-w-3xl mx-auto px-6 space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                 Galeria de Engenharia & Arquitetura
               </p>
@@ -644,21 +693,21 @@ export default function App() {
               <p className="text-xs md:text-sm text-[#1e3a5f] leading-relaxed font-medium">
                 Confira o padrão construtivo da Prumo Construções em obras residenciais, fundações, estruturas de alvenaria e acabamentos de alto padrão.
               </p>
-            </div>
+            </motion.div>
 
             <div className="w-full">
               <GalleryViewer />
             </div>
 
-          </motion.div>
+          </div>
         </section>
 
         {/* 7. Antes e Depois Section */}
         <section id="comparacao" className="py-20 bg-white border-b border-sky-100">
-          <motion.div {...sectionRevealProps} className="max-w-7xl mx-auto px-6 space-y-12">
+          <div className="max-w-7xl mx-auto px-6 space-y-12">
             
             {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto space-y-3">
+            <motion.div {...headerRevealProps} className="text-center max-w-3xl mx-auto space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                 Transformação Completa
               </p>
@@ -668,7 +717,7 @@ export default function App() {
               <p className="text-xs md:text-sm text-[#1e3a5f] leading-relaxed font-medium">
                 Compare a etapa estrutural em alvenaria e concreto com o resultado final de acabamento entregue pela Prumo Construções.
               </p>
-            </div>
+            </motion.div>
 
             {/* Slider Component */}
             <div className="w-full max-w-6xl mx-auto">
@@ -680,7 +729,7 @@ export default function App() {
               />
             </div>
 
-          </motion.div>
+          </div>
         </section>
 
         {/* 8. Depoimentos Section - #0893E6 Background & Continuous Moving Carousel */}
@@ -688,7 +737,7 @@ export default function App() {
           <motion.div {...sectionRevealProps} className="space-y-12">
             
             {/* Header Title */}
-            <div className="text-center max-w-3xl mx-auto px-6 space-y-3">
+            <motion.div {...headerRevealProps} className="text-center max-w-3xl mx-auto px-6 space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest text-white/90 font-extrabold">
                 Avaliações de Clientes
               </p>
@@ -698,7 +747,7 @@ export default function App() {
               <p className="text-xs md:text-sm text-white/95 leading-relaxed font-medium max-w-2xl mx-auto">
                 Confira o que dizem nossos clientes sobre a pontualidade, organização e rigor técnico da Prumo Construções em Santa Catarina.
               </p>
-            </div>
+            </motion.div>
 
             {/* Continuously Moving Horizontal Cards Carousel */}
             <div 
@@ -794,13 +843,16 @@ export default function App() {
 
         {/* 9. Contato Section - Left Titles & Right WhatsApp Form */}
         <section id="contato" className="py-20 bg-white border-b border-sky-100">
-          <motion.div
-            {...sectionRevealProps}
-            className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center"
-          >
+          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
             {/* Left Side: Header Titles & Trust Highlights */}
-            <div className="lg:col-span-5 text-left space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2, margin: "0px 0px -40px 0px" }}
+              transition={{ duration: 0.82, ease: PIKA_EASE }}
+              className="lg:col-span-5 text-left space-y-6 will-change-transform"
+            >
               <div className="space-y-4">
                 <p className="text-xs font-mono uppercase tracking-widest text-[#0066cc] font-extrabold">
                   Atendimento Rápido
@@ -814,63 +866,63 @@ export default function App() {
               </div>
 
               <div className="space-y-3 pt-2 border-t border-sky-100">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
-                      Garantia Estrutural de 5 Anos
-                    </h4>
-                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
-                      Execução técnica em conformidade com as normas ABNT e Código Civil.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
-                      Retorno Rápido via WhatsApp
-                    </h4>
-                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
-                      Atendimento direto com nossos responsáveis técnicos para tirar dúvidas e agendar vistorias.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
-                      Atendimento em Toda Santa Catarina
-                    </h4>
-                    <p className="text-xs text-[#1e3a5f] leading-relaxed">
-                      Equipe própria e estruturada para obras residenciais, comerciais e reformas em qualquer cidade de SC.
-                    </p>
-                  </div>
-                </div>
+                {[
+                  {
+                    title: "Garantia Estrutural de 5 Anos",
+                    desc: "Execução técnica em conformidade com as normas ABNT e Código Civil.",
+                  },
+                  {
+                    title: "Retorno Rápido via WhatsApp",
+                    desc: "Atendimento direto com nossos responsáveis técnicos para tirar dúvidas e agendar vistorias.",
+                  },
+                  {
+                    title: "Atendimento em Toda Santa Catarina",
+                    desc: "Equipe própria e estruturada para obras residenciais, comerciais e reformas em qualquer cidade de SC.",
+                  },
+                ].map((item, idx) => (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.72, delay: 0.1 + idx * 0.09, ease: PIKA_EASE }}
+                    className="flex items-start gap-3"
+                  >
+                    <span className="mt-0.5 p-1.5 rounded-lg bg-[#eef6ff] text-[#0066cc] shrink-0">
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#041e42] uppercase tracking-wide">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-[#1e3a5f] leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Right Side: Interactive WhatsApp Form */}
             <div className="lg:col-span-7 w-full">
               <ContactForm />
             </div>
 
-          </motion.div>
+          </div>
         </section>
 
       </main>
 
       {/* 10. Footer Section - Exact Logo Blue (#0893E6) and Borderless Logo */}
-      <footer className="bg-[#0893E6] text-white py-12 font-sans text-xs">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+      <footer className="bg-[#0893E6] text-white py-12 font-sans text-xs overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.78, ease: PIKA_EASE }}
+          className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-8"
+        >
           
           <div className="space-y-4">
             <div className="flex items-center w-fit">
@@ -957,7 +1009,7 @@ export default function App() {
             </div>
           </div>
 
-        </div>
+        </motion.div>
       </footer>
 
       {/* Official Pages Modal Portal */}

@@ -4,7 +4,10 @@
  */
 
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import { APP_DETAILS, SERVICES } from "../constants";
+
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function ContactForm() {
   const [clientName, setClientName] = useState("");
@@ -47,7 +50,14 @@ export default function ContactForm() {
   };
 
   return (
-    <div id="contato-oficial-dados" className="w-full border border-[#cbe2ff] bg-[#eef6ff] rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-md">
+    <motion.div
+      id="contato-oficial-dados"
+      initial={{ opacity: 0, y: 32, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -40px 0px" }}
+      transition={{ duration: 0.82, delay: 0.1, ease: SMOOTH_EASE }}
+      className="w-full border border-[#cbe2ff] bg-[#eef6ff] rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-md will-change-transform"
+    >
       <form onSubmit={handleSubmitWhatsApp} className="space-y-5 font-sans">
         <div className="space-y-1 border-b border-[#cbe2ff] pb-4">
           <span className="font-mono text-[10px] uppercase tracking-widest text-[#0066cc] font-extrabold">
@@ -152,6 +162,6 @@ export default function ContactForm() {
           </span>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }

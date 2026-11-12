@@ -4,6 +4,9 @@
  */
 
 import React, { useState } from "react";
+import { motion } from "motion/react";
+
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 interface BeforeAfterSliderProps {
   beforeImage: string;
@@ -21,17 +24,29 @@ export default function BeforeAfterSlider({
   const [isRevealed, setIsRevealed] = useState(false);
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-3">
+    <motion.div
+      initial={{ opacity: 0, y: 34, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -40px 0px" }}
+      transition={{ duration: 0.82, ease: SMOOTH_EASE }}
+      className="w-full max-w-6xl mx-auto space-y-3 will-change-transform"
+    >
       {/* Rectangular Box with Rounded Borders */}
       <div className="border border-sky-100 bg-[#f5faff] p-5 md:p-8 shadow-md rounded-3xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           
           {/* LEFT SIDE: ANTES */}
-          <div className="relative overflow-hidden aspect-[4/3] rounded-xl border border-sky-100 bg-white group shadow-xs">
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.78, delay: 0.08, ease: SMOOTH_EASE }}
+            className="relative overflow-hidden aspect-[4/3] rounded-xl border border-sky-100 bg-white group shadow-xs"
+          >
             <img
               src={beforeImage}
               alt="Antes da obra - Estrutura em execução"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
             {/* Label Header */}
@@ -40,10 +55,14 @@ export default function BeforeAfterSlider({
                 {beforeLabel}
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* RIGHT SIDE: DEPOIS (Blurred until clicked) */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.78, delay: 0.16, ease: SMOOTH_EASE }}
             onClick={() => setIsRevealed(!isRevealed)}
             className="relative overflow-hidden aspect-[4/3] rounded-xl border border-sky-100 bg-white cursor-pointer group select-none shadow-xs"
             title="Clique para ver o resultado"
@@ -90,10 +109,10 @@ export default function BeforeAfterSlider({
                 <span>Ocultar</span>
               </button>
             )}
-          </div>
+          </motion.div>
 
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

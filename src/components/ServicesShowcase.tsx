@@ -4,8 +4,11 @@
  */
 
 import React from "react";
+import { motion } from "motion/react";
 import { Home, Wrench, Layers, Paintbrush, Building2, Users } from "lucide-react";
 import { SERVICES, APP_DETAILS } from "../constants";
+
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function ServicesShowcase() {
   const serviceIcons = [Home, Wrench, Layers, Building2, Paintbrush, Users];
@@ -24,17 +27,25 @@ export default function ServicesShowcase() {
           const IconComponent = serviceIcons[idx % serviceIcons.length];
 
           return (
-            <div
+            <motion.div
               key={service.id}
               id={`service-card-${service.id}`}
-              className="group rounded-2xl p-5 flex flex-col justify-start transition-all duration-200 shadow-sm hover:shadow-lg bg-white text-[#041e42] border border-[#cbe2ff] hover:border-[#0066cc]"
+              initial={{ opacity: 0, y: 34, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.14, margin: "0px 0px -40px 0px" }}
+              transition={{
+                duration: 0.78,
+                delay: (idx % 3) * 0.1,
+                ease: SMOOTH_EASE,
+              }}
+              className="group rounded-2xl p-5 flex flex-col justify-start transition-shadow duration-300 shadow-sm hover:shadow-lg bg-white text-[#041e42] border border-[#cbe2ff] hover:border-[#0066cc] will-change-transform"
             >
               {/* Image box - Rounded Rectangular */}
               <div className="relative aspect-[16/10] shrink-0 overflow-hidden rounded-xl mb-5 border border-[#d4e6ff] bg-sky-50">
                 <img
                   src={service.image}
                   alt={service.name}
-                  className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -58,13 +69,19 @@ export default function ServicesShowcase() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Standard Section CTA Button Below Cards */}
-      <div className="flex justify-center pt-2 w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.72, delay: 0.12, ease: SMOOTH_EASE }}
+        className="flex justify-center pt-2 w-full"
+      >
         <button
           type="button"
           onClick={handleServiceQuote}
@@ -72,7 +89,7 @@ export default function ServicesShowcase() {
         >
           <span>Solicitar Orçamento</span>
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }
